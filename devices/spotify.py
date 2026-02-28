@@ -14,10 +14,52 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     scope=scope
 ))
 
+DEVICES = {
+    "kitchen": "b40e70ad-50d8-4ee3-9880-07828cac9ecf_amzn_2",
+    "garage": "c7830080-383a-4738-8d37-28ea2479d04e_amzn_1",
+    "everywhere": "47dbdda6-e490-4f54-9f45-1aa7ed7dbc65_amzn_4",
+    "bevs room": "248ed713-f484-434c-a14f-6ddc345b8423_amzn_1",
+    "mollys room": "b40e70ad-50d8-4ee3-9880-07828cac9ecf_amzn_1",
+    "mom and dads room": "47dbdda6-e490-4f54-9f45-1aa7ed7dbc65_amzn_1",
+    "bevs echo": "77fb0c75-7876-43f2-92a1-ad754d8ea738_amzn_1"
+}
+
 def play():
-    """Resume playback"""
-    sp.start_playback()
-    print("Spotify playing")
+    """Resume playback — falls back to first available device"""
+    try:
+        sp.start_playback()
+        print("Spotify playing")
+    except Exception:
+        devices = sp.devices()
+        if devices["devices"]:
+            device_id = devices["devices"][0]["id"]
+            sp.transfer_playback(device_id=device_id, force_play=True)
+            print(f"Transferred to {devices['devices'][0]['name']}")
+        else:
+            print("No devices available")
+
+def play_on_device(device_name):
+    """Play Spotify on a specific device by name"""
+    device_name_lower = device_name.lower()
+
+    # Check static devices first
+    if device_name_lower in DEVICES:
+        sp.transfer_playback(device_id=DEVICES[device_name_lower], force_play=True)
+        print(f"Playing on {device_name}")
+        return
+
+    # Search live devices for Apple devices or anything not in static list
+    devices = sp.devices()
+    for d in devices["devices"]:
+        if device_name_lower in d["name"].lower():
+            sp.transfer_playback(device_id=d["id"], force_play=True)
+            print(f"Playing on {d['name']}")
+            return
+
+    print(f"Could not find device: {device_name}")
+    print("Available devices:")
+    for d in devices["devices"]:
+        print(f"  - {d['name']}")
 
 def pause():
     """Pause playback"""
@@ -70,4 +112,3 @@ def get_current_track():
 
 if __name__ == "__main__":
     print(get_current_track())
-    
