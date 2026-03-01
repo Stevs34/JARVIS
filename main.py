@@ -8,6 +8,7 @@ from ai import ask_jarvis
 from devices import spotify
 from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
+from memory import remember, add_reminder, get_reminders, clear_reminder
 import threading
 import json
 
@@ -113,6 +114,17 @@ def handle_action(action, params):
             result = sleep_mac()
             speak_wait(result)
 
+        # Memory actions
+        elif action == "add_reminder":
+            result = add_reminder(
+                params.get("text", ""),
+                params.get("time", None)
+            )
+            speak_wait(result)
+        elif action == "get_reminders":
+            result = get_reminders()
+            speak_wait(result)
+
         # Arduino physical device actions
         elif action == "lights_on":
             arduino_device.lights_on()
@@ -183,6 +195,7 @@ while True:
         response = result.get("response", "")
         action = result.get("action", "none")
         params = result.get("params", {})
+        memory_item = result.get("remember")
 
         print(f"Action: {action}")
 
@@ -197,6 +210,10 @@ while True:
 
         handle_action(action, params)
 
+        # Store anything Jarvis was asked to remember
+        if memory_item:
+            remember(memory_item.get("key", "notes"), memory_item.get("value", ""))
+
         if command == "stop" or action == "shutdown":
             speak_wait("Goodbye sir.")
             exit()
@@ -206,3 +223,4 @@ while True:
             break
 
         time.sleep(0.5)
+        
