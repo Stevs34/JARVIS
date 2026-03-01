@@ -12,6 +12,10 @@ from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
                     get_sports_scores, get_stock, wikipedia_search,
                     translate_text, random_fact, media_play_pause,
                     media_next, media_previous, send_imessage, get_directions)
+from core.engineering import (solve_engineering, summarize_pdf, get_latest_pdf,
+                               add_deadline, get_deadlines, check_urgent_deadlines,
+                               start_lab_report, add_lab_observation, add_lab_result,
+                               set_lab_section, export_lab_report, unit_convert)
 from speech import speak, speak_wait, listen, wait_for_wake_word
 from ai import ask_jarvis
 from devices import spotify
@@ -244,6 +248,61 @@ def handle_action(action, params):
                 arduino_device.fan_off()
             speak_wait("Fan off sir.")
 
+        # Engineering skills
+        elif action == "engineering_solve":
+            problem_type = params.get("problem_type", "")
+            kwargs = {k: v for k, v in params.items() if k != "problem_type"}
+            result = solve_engineering(problem_type, **kwargs)
+            speak_wait(result)
+        elif action == "unit_convert":
+            result = unit_convert(
+                params.get("value", 0),
+                params.get("from_unit", ""),
+                params.get("to_unit", "")
+            )
+            speak_wait(result)
+        elif action == "summarize_pdf":
+            filepath = params.get("filepath", "")
+            if not filepath:
+                filepath = get_latest_pdf()
+                if filepath:
+                    speak_wait(f"Summarizing {os.path.basename(filepath)} sir.")
+                else:
+                    speak_wait("No PDF found sir.")
+                    filepath = None
+            if filepath:
+                result = summarize_pdf(filepath)
+                speak_wait(result)
+        elif action == "add_deadline":
+            result = add_deadline(
+                params.get("title", ""),
+                params.get("course", ""),
+                params.get("due_date", ""),
+                params.get("type", "assignment")
+            )
+            speak_wait(result)
+        elif action == "get_deadlines":
+            result = get_deadlines()
+            speak_wait(result)
+        elif action == "start_lab_report":
+            result = start_lab_report(params.get("lab_name", "Lab"))
+            speak_wait(result)
+        elif action == "add_lab_observation":
+            result = add_lab_observation(params.get("observation", ""))
+            speak_wait(result)
+        elif action == "add_lab_result":
+            result = add_lab_result(params.get("result", ""))
+            speak_wait(result)
+        elif action == "set_lab_section":
+            result = set_lab_section(
+                params.get("section", ""),
+                params.get("content", "")
+            )
+            speak_wait(result)
+        elif action == "export_lab_report":
+            result = export_lab_report()
+            speak_wait(result)
+
         elif action == "none":
             pass
 
@@ -278,6 +337,14 @@ def jarvis_main():
         reminders = get_reminders()
         if "No reminders" not in reminders:
             speak_wait(f"Sir, you have pending items. {reminders}")
+    except:
+        pass
+
+    # Check urgent deadlines
+    try:
+        urgent = check_urgent_deadlines()
+        if urgent:
+            speak_wait(urgent)
     except:
         pass
 

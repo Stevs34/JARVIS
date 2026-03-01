@@ -70,6 +70,16 @@ def ask_jarvis(command):
     - "media_previous" : {}
     - "send_imessage" : {"contact": "name or number", "message": "message text"}
     - "get_directions" : {"destination": "address or place"}
+    - "engineering_solve" : {"problem_type": "ideal_gas/heat_transfer/reynolds/stress_strain", "P": number, "V": number, "n": number, "T": number}
+    - "unit_convert" : {"value": number, "from_unit": "unit", "to_unit": "unit"}
+    - "summarize_pdf" : {"filepath": "path or empty for latest"}
+    - "add_deadline" : {"title": "assignment name", "course": "course name", "due_date": "YYYY-MM-DD", "type": "assignment/exam/lab"}
+    - "get_deadlines" : {}
+    - "start_lab_report" : {"lab_name": "name of lab"}
+    - "add_lab_observation" : {"observation": "what you observed"}
+    - "add_lab_result" : {"result": "result value or description"}
+    - "set_lab_section" : {"section": "objective/equipment/procedure/conclusion", "content": "text"}
+    - "export_lab_report" : {}
     - "none" : {}
     """
 
@@ -97,7 +107,7 @@ def ask_jarvis(command):
         "RESPONSE STYLE:\n"
         "- Keep responses SHORT — 1-2 sentences maximum\n"
         "- Be direct and precise — no fluff or filler words\n"
-        "- For data actions like weather/stocks/time set response to empty string ''\n"
+        "For actions that fetch or calculate data — get_weather, get_stock, get_time, get_sports, wikipedia, random_fact, engineering_solve, unit_convert, summarize_pdf, get_deadlines, add_deadline, add_lab_observation, add_lab_result, set_lab_section, export_lab_report — set response to a very short acknowledgement like 'Calculating now sir.' or 'One moment.' — never say the actual result as the skill will speak it.\n"
         "- Occasionally add a brief witty observation after completing a task\n"
         "- If the user asks something you can't do, explain it with dry humor\n\n"
 
