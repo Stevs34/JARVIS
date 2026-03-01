@@ -1,10 +1,11 @@
-from ui.orb import set_orb_state, OrbWidget
 import subprocess
 import sys
 import time
+import threading
+import json
+from datetime import datetime
 from devices import lights
 from devices import tv as tv_device
-from datetime import datetime
 from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
                     set_timer, get_battery, set_volume, volume_up,
                     volume_down, mute_mac, open_app, lock_mac, sleep_mac,
@@ -17,16 +18,14 @@ from devices import spotify
 from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
 from core.memory import remember, add_reminder, get_reminders, clear_reminder
-from ui.orb import launch_orb, set_orb_state
-import threading
-import json
+
+# Orb temporarily disabled
+def set_orb_state(state):
+    pass
 
 # Start dashboard in background thread
 dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
 dashboard_thread.start()
-
-# Launch orb
-launch_orb()
 
 # Connect to Arduino
 arduino_connected = arduino_device.connect()
@@ -252,13 +251,39 @@ def handle_action(action, params):
 
     except Exception as e:
         print(f"Action error: {e}")
-        speak_wait("I encountered an issue with that command sir.")
+        speak_wait("My apologies sir, I encountered a slight technical difficulty.")
 
-#bootup
 def jarvis_main():
-    """Main Jarvis loop — runs in background thread"""
+    """Main Jarvis loop"""
     set_orb_state("idle")
-    speak_wait("Good evening. J.A.R.V.I.S. online. All systems ready.")
+
+    # Boot sequence
+    speak_wait("J.A.R.V.I.S. online. Running startup diagnostics.")
+    time.sleep(0.5)
+
+    # Check battery
+    try:
+        battery = get_battery()
+        speak_wait(f"Power systems nominal. {battery}")
+    except:
+        pass
+
+    # Check weather
+    try:
+        weather = get_weather()
+        speak_wait(f"Environmental scan complete. {weather}")
+    except:
+        pass
+
+    # Check reminders
+    try:
+        reminders = get_reminders()
+        if "No reminders" not in reminders:
+            speak_wait(f"Sir, you have pending items. {reminders}")
+    except:
+        pass
+
+    speak_wait("All systems ready. Good to have you back sir.")
 
     while True:
         if arduino_connected:
@@ -320,26 +345,10 @@ def jarvis_main():
 
             time.sleep(0.5)
 
-# Start dashboard in background thread — only once
-dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
-dashboard_thread.start()
-
-# Connect to Arduino
-arduino_connected = arduino_device.connect()
-if arduino_connected:
-    arduino_device.set_button_callback(on_button_press)
-
 # Start Jarvis main loop in background thread
 jarvis_thread = threading.Thread(target=jarvis_main, daemon=True)
 jarvis_thread.start()
 
-# Launch orb on main thread — required by macOS
-import sys
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtCore import QTimer
-from ui.orb import OrbWidget, _state, set_orb_state as _set_state
-
-qt_app = QApplication(sys.argv)
-orb = OrbWidget()
-orb.show()
-qt_app.exec()
+# Keep main thread alive
+while True:
+    time.sleep(1)
