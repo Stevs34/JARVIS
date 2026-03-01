@@ -338,7 +338,7 @@ def jarvis_main():
     set_orb_state("idle")
 
     # Boot sequence
-    speak_wait("J.A.R.V.I.S. online. Running startup diagnostics.")
+    speak_wait("JARVIS online. Running startup diagnostics.")
     time.sleep(0.5)
 
     # Check battery

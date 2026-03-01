@@ -24,6 +24,36 @@
       "action": "study_mode",
       "hour": 11,
       "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 12,
+      "day": "Sunday"
+    },
+    {
+      "action": "none",
+      "hour": 12,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 12,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 12,
+      "day": "Sunday"
+    },
+    {
+      "action": "calculate",
+      "hour": 12,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 12,
+      "day": "Sunday"
     }
   ],
   "suggestions_made": []

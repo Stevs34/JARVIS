@@ -1,6 +1,7 @@
 import tinytuya
 import os
 import colorsys
+import threading
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -10,7 +11,6 @@ LIGHT_LOCAL_KEY = os.getenv("TUYA_LIGHT_LOCAL_KEY")
 LIGHT_IP = os.getenv("TUYA_LIGHT_IP")
 
 def connect_light():
-    """Connect to your Smart Life light"""
     device = tinytuya.BulbDevice(
         dev_id=LIGHT_DEVICE_ID,
         address=LIGHT_IP,
@@ -20,7 +20,6 @@ def connect_light():
     return device
 
 def rgb_to_payload(r, g, b):
-    """Convert RGB to Tuya HSV hex string"""
     h, s, v = colorsys.rgb_to_hsv(r/255, g/255, b/255)
     h = int(h * 360)
     s = int(s * 1000)
@@ -28,54 +27,60 @@ def rgb_to_payload(r, g, b):
     return f"{h:04x}{s:04x}{v:04x}"
 
 def set_colour(r, g, b):
-    """Set colour using RGB values 0-255"""
     d = connect_light()
     payload = rgb_to_payload(r, g, b)
     d.set_value(21, 'colour')
     d.set_value(24, payload)
-    print(f"Colour set to RGB({r}, {g}, {b})")
+
+def fade_to_colour(r2, g2, b2, steps=10):
+    import time
+    try:
+        d = connect_light()
+        status = d.status()
+        current = status.get('dps', {}).get('24', '000003e803e8')
+        r1 = int(current[0:4], 16) / 360 * 255
+        g1 = int(current[4:8], 16) / 1000 * 255
+        b1 = int(current[8:12], 16) / 1000 * 255
+        for i in range(1, steps + 1):
+            t = i / steps
+            r = int(r1 + (r2 - r1) * t)
+            g = int(g1 + (g2 - g1) * t)
+            b = int(b1 + (b2 - b1) * t)
+            payload = rgb_to_payload(r, g, b)
+            d.set_value(21, 'colour')
+            d.set_value(24, payload)
+            time.sleep(0.05)
+    except:
+        set_colour(r2, g2, b2)
 
 def turn_on():
     d = connect_light()
     d.set_value(20, True)
-    print("Lights on")
 
 def turn_off():
     d = connect_light()
     d.set_value(20, False)
-    print("Lights off")
 
 def set_brightness(brightness):
-    """Set brightness 0-100"""
     d = connect_light()
     value = int(brightness * 10)
     d.set_value(22, value)
-    print(f"Brightness set to {brightness}%")
 
 def movie_mode():
-    """Dim purple for movie watching"""
-    set_colour(20, 0, 40)
-    print("Movie mode activated")
+    threading.Thread(target=fade_to_colour, args=(20, 0, 40), daemon=True).start()
 
 def study_mode():
-    """Bright white for studying"""
     d = connect_light()
     d.set_value(21, 'white')
     d.set_value(22, 1000)
-    print("Study mode activated")
 
 def good_morning():
-    """Soft warm orange"""
-    set_colour(255, 147, 41)
-    print("Good morning mode activated")
+    threading.Thread(target=fade_to_colour, args=(255, 147, 41), daemon=True).start()
 
 def party_mode():
-    """Bright pink for party"""
-    set_colour(255, 0, 128)
-    print("Party mode activated")
+    threading.Thread(target=fade_to_colour, args=(255, 0, 128), daemon=True).start()
 
 def set_colour_by_name(colour_name):
-    """Set light colour by name"""
     colours = {
         "red": (255, 0, 0),
         "green": (0, 255, 0),
@@ -101,6 +106,6 @@ def set_colour_by_name(colour_name):
     colour = colours.get(colour_name.lower())
     if colour:
         r, g, b = colour
-        set_colour(r, g, b)
-        return f"Lights set to {colour_name} sir."
+        threading.Thread(target=fade_to_colour, args=(r, g, b), daemon=True).start()
+        return f"Lights fading to {colour_name} sir."
     return f"I don't know the colour {colour_name} sir."

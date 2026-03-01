@@ -227,20 +227,21 @@ def suggest_routine():
 
 def autonomous_loop():
     """Run all autonomous behaviors in background"""
+    global check_interval
     print("Autonomous systems online")
     check_interval = 0
 
+    # Wait 30 seconds before starting autonomous behavior
+    time.sleep(30)
+
     while True:
         try:
-            # Every 30 seconds
             check_mac_sleep()
 
-            # Every 5 minutes
             if check_interval % 10 == 0:
                 auto_adjust_lights()
                 auto_study_mode()
 
-            # Every 30 minutes
             if check_interval % 60 == 0:
                 check_deadlines_auto()
                 suggest_routine()
