@@ -1,11 +1,12 @@
 import subprocess
 import time
 from skills import (get_weather, get_time, get_news, calculate, get_joke,
-                    set_timer, get_battery, set_volume, volume_up, 
+                    set_timer, get_battery, set_volume, volume_up,
                     volume_down, mute_mac, open_app, lock_mac, sleep_mac)
 from speech import speak, speak_wait, listen, wait_for_wake_word
 from ai import ask_jarvis
 from devices import spotify
+from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
 import threading
 import json
@@ -13,6 +14,29 @@ import json
 # Start dashboard in background thread
 dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
 dashboard_thread.start()
+
+# Connect to Arduino
+arduino_connected = arduino_device.connect()
+
+# Handle physical button presses
+def on_button_press(btn):
+    if btn == "BTN_MOVIE_MODE":
+        speak("Movie mode activated sir.")
+        handle_action("movie_mode", {})
+    elif btn == "BTN_STUDY_MODE":
+        speak("Study mode activated sir.")
+        handle_action("study_mode", {})
+    elif btn == "BTN_PARTY_MODE":
+        speak("Party mode activated sir.")
+        handle_action("lights_party_mode", {})
+    elif btn == "BTN_GOOD_MORNING":
+        speak("Good morning sir.")
+        handle_action("good_morning", {})
+    elif btn == "BTN_STOP":
+        speak("Cancelling sir.")
+
+if arduino_connected:
+    arduino_device.set_button_callback(on_button_press)
 
 def handle_action(action, params):
     """Route actions to the right device module"""
@@ -89,14 +113,33 @@ def handle_action(action, params):
             result = sleep_mac()
             speak_wait(result)
 
-        # Placeholder actions for devices we'll connect at home
-        elif action in ["lights_on", "lights_off", "lights_movie_mode",
-                        "lights_study_mode", "lights_good_morning",
-                        "lights_party_mode", "lights_brightness",
-                        "tv_on", "tv_off", "tv_volume_up", "tv_volume_down",
-                        "tv_mute", "tv_movie_mode", "movie_mode",
-                        "study_mode", "good_morning"]:
-            speak_wait("That device isn't connected yet sir, but I'll handle it when it is.")
+        # Arduino physical device actions
+        elif action == "lights_on":
+            arduino_device.lights_on()
+            update_state("lights", "On")
+            speak_wait("Lights on sir.")
+        elif action == "lights_off":
+            arduino_device.lights_off()
+            update_state("lights", "Off")
+            speak_wait("Lights off sir.")
+        elif action == "movie_mode":
+            arduino_device.movie_mode()
+            update_state("lights", "Movie Mode")
+        elif action == "study_mode":
+            arduino_device.study_mode()
+            update_state("lights", "Study Mode")
+        elif action == "lights_party_mode":
+            arduino_device.party_mode()
+            update_state("lights", "Party Mode")
+        elif action == "good_morning":
+            arduino_device.good_morning()
+            update_state("lights", "Morning Mode")
+        elif action == "fan_on":
+            arduino_device.fan_on()
+            speak_wait("Fan on sir.")
+        elif action == "fan_off":
+            arduino_device.fan_off()
+            speak_wait("Fan off sir.")
 
         elif action == "none":
             pass
@@ -109,9 +152,17 @@ def handle_action(action, params):
 speak_wait("Good evening. J.A.R.V.I.S. online. All systems ready.")
 
 while True:
-    # Wait for wake word
+    # Idle status
+    if arduino_connected:
+        arduino_device.status_idle()
+
     wait_for_wake_word()
     subprocess.run(['afplay', '/System/Library/Sounds/Tink.aiff'])
+
+    # Listening status
+    if arduino_connected:
+        arduino_device.status_listening()
+
     speak_wait("Yes?")
 
     # Allow up to 3 back and forth exchanges without wake word
@@ -122,6 +173,11 @@ while True:
 
         print(f"Processing: {command}")
         update_state("last_command", command)
+
+        # Processing status
+        if arduino_connected:
+            arduino_device.status_processing()
+
         result = ask_jarvis(command)
 
         response = result.get("response", "")
@@ -130,7 +186,10 @@ while True:
 
         print(f"Action: {action}")
 
-        # If there's a skill action, wait for response to finish first
+        # Speaking status
+        if arduino_connected:
+            arduino_device.status_speaking()
+
         if action != "none":
             speak_wait(response)
         else:
@@ -147,4 +206,3 @@ while True:
             break
 
         time.sleep(0.5)
-        
