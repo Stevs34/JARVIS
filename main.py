@@ -1,44 +1,32 @@
-# Fast imports at top
+from ui.orb import set_orb_state, OrbWidget
 import subprocess
+import sys
 import time
+from devices import lights
+from devices import tv as tv_device
 from datetime import datetime
-from speech import speak, speak_wait, listen, wait_for_wake_word
-from ai import ask_jarvis
-from devices import spotify
-from dashboard.app import run_dashboard, update_state
-from core.memory import remember, add_reminder, get_reminders, clear_reminder
-import threading
-import json
-
-# Lazy load device modules
-try:
-    from devices import lights
-    lights_available = True
-except:
-    lights_available = False
-
-try:
-    from devices import tv as tv_device
-    tv_available = True
-except:
-    tv_available = False
-
-try:
-    from devices import arduino as arduino_device
-    arduino_available = True
-except:
-    arduino_available = False
-
-# Skills - lazy loaded inside functions so startup is fast
 from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
                     set_timer, get_battery, set_volume, volume_up,
                     volume_down, mute_mac, open_app, lock_mac, sleep_mac,
                     get_sports_scores, get_stock, wikipedia_search,
                     translate_text, random_fact, media_play_pause,
                     media_next, media_previous, send_imessage, get_directions)
+from speech import speak, speak_wait, listen, wait_for_wake_word
+from ai import ask_jarvis
+from devices import spotify
+from devices import arduino as arduino_device
+from dashboard.app import run_dashboard, update_state
+from core.memory import remember, add_reminder, get_reminders, clear_reminder
+from ui.orb import launch_orb, set_orb_state
+import threading
+import json
+
 # Start dashboard in background thread
 dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
 dashboard_thread.start()
+
+# Launch orb
+launch_orb()
 
 # Connect to Arduino
 arduino_connected = arduino_device.connect()
@@ -147,7 +135,10 @@ def handle_action(action, params):
             result = wikipedia_search(params.get("query", ""))
             speak_wait(result)
         elif action == "translate":
-            result = translate_text(params.get("text", ""), params.get("language", "fr"))
+            result = translate_text(
+                params.get("text", ""),
+                params.get("language", "fr")
+            )
             speak_wait(result)
         elif action == "random_fact":
             result = random_fact()
@@ -263,65 +254,92 @@ def handle_action(action, params):
         print(f"Action error: {e}")
         speak_wait("I encountered an issue with that command sir.")
 
-# Boot up
-speak_wait("Good evening. J.A.R.V.I.S. online. All systems ready.")
+#bootup
+def jarvis_main():
+    """Main Jarvis loop — runs in background thread"""
+    set_orb_state("idle")
+    speak_wait("Good evening. J.A.R.V.I.S. online. All systems ready.")
 
-while True:
-    # Idle status
-    if arduino_connected:
-        arduino_device.status_idle()
-
-    wait_for_wake_word()
-    subprocess.run(['afplay', '/System/Library/Sounds/Tink.aiff'])
-
-    # Listening status
-    if arduino_connected:
-        arduino_device.status_listening()
-
-    speak_wait("Yes?")
-
-    # Allow up to 3 back and forth exchanges without wake word
-    for _ in range(3):
-        command = listen()
-        if not command:
-            break
-
-        print(f"Processing: {command}")
-        update_state("last_command", command)
-
-        # Processing status
+    while True:
         if arduino_connected:
-            arduino_device.status_processing()
+            arduino_device.status_idle()
+        set_orb_state("idle")
 
-        result = ask_jarvis(command)
+        wait_for_wake_word()
+        subprocess.run(['afplay', '/System/Library/Sounds/Tink.aiff'])
 
-        response = result.get("response", "")
-        action = result.get("action", "none")
-        params = result.get("params", {})
-        memory_item = result.get("remember")
-
-        print(f"Action: {action}")
-
-        # Speaking status
         if arduino_connected:
-            arduino_device.status_speaking()
+            arduino_device.status_listening()
+        set_orb_state("listening")
 
-        if action != "none":
-            speak_wait(response)
-        else:
-            speak_wait(response)
+        speak_wait("Yes?")
 
-        handle_action(action, params)
+        for _ in range(3):
+            command = listen()
+            if not command:
+                set_orb_state("idle")
+                break
 
-        # Store anything Jarvis was asked to remember
-        if memory_item:
-            remember(memory_item.get("key", "notes"), memory_item.get("value", ""))
+            print(f"Processing: {command}")
+            update_state("last_command", command)
 
-        if command == "stop" or action == "shutdown":
-            speak_wait("Goodbye sir.")
-            exit()
+            if arduino_connected:
+                arduino_device.status_processing()
+            set_orb_state("processing")
 
-        if "?" not in response:
-            break
+            result = ask_jarvis(command)
 
-        time.sleep(0.5)
+            response = result.get("response", "")
+            action = result.get("action", "none")
+            params = result.get("params", {})
+            memory_item = result.get("remember")
+
+            print(f"Action: {action}")
+
+            if arduino_connected:
+                arduino_device.status_speaking()
+            set_orb_state("speaking")
+
+            if action != "none":
+                speak_wait(response)
+            else:
+                speak_wait(response)
+
+            set_orb_state("listening")
+            handle_action(action, params)
+
+            if memory_item:
+                remember(memory_item.get("key", "notes"), memory_item.get("value", ""))
+
+            if command == "stop" or action == "shutdown":
+                speak_wait("Goodbye sir.")
+                exit()
+
+            if "?" not in response:
+                break
+
+            time.sleep(0.5)
+
+# Start dashboard in background thread — only once
+dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
+dashboard_thread.start()
+
+# Connect to Arduino
+arduino_connected = arduino_device.connect()
+if arduino_connected:
+    arduino_device.set_button_callback(on_button_press)
+
+# Start Jarvis main loop in background thread
+jarvis_thread = threading.Thread(target=jarvis_main, daemon=True)
+jarvis_thread.start()
+
+# Launch orb on main thread — required by macOS
+import sys
+from PyQt6.QtWidgets import QApplication
+from PyQt6.QtCore import QTimer
+from ui.orb import OrbWidget, _state, set_orb_state as _set_state
+
+qt_app = QApplication(sys.argv)
+orb = OrbWidget()
+orb.show()
+qt_app.exec()
