@@ -149,16 +149,12 @@ def check_mac_sleep():
     global last_mac_active
     try:
         result = subprocess.run(
-            ['pmset', '-g', 'powerstate'],
-            capture_output=True, text=True
-        )
-        # Check display status
-        result2 = subprocess.run(
             ['ioreg', '-n', 'IODisplayWrangler'],
             capture_output=True, text=True
         )
-        is_active = 'DevicePowerState" = 4' in result2.stdout
-
+        # Only sleep if display power state is 0 (fully off)
+        is_active = 'DevicePowerState" = 0' not in result.stdout
+        
         if not is_active and last_mac_active:
             last_mac_active = False
             _handle_action("lights_off", {})
@@ -262,4 +258,3 @@ def start_autonomous(speak_func, handle_action_func):
     thread = threading.Thread(target=autonomous_loop, daemon=True)
     thread.start()
     print("Autonomous systems started")
-    

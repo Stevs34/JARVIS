@@ -1,0 +1,30 @@
+{
+  "patterns": [
+    {
+      "action": "lights_off",
+      "hour": 11,
+      "day": "Sunday"
+    },
+    {
+      "action": "study_mode",
+      "hour": 11,
+      "day": "Sunday"
+    },
+    {
+      "action": "get_weather",
+      "hour": 11,
+      "day": "Sunday"
+    },
+    {
+      "action": "study_mode",
+      "hour": 11,
+      "day": "Sunday"
+    },
+    {
+      "action": "study_mode",
+      "hour": 11,
+      "day": "Sunday"
+    }
+  ],
+  "suggestions_made": []
+}

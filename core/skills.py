@@ -78,22 +78,29 @@ def set_timer(seconds, speak_func):
     return f"Timer set for {seconds} seconds sir."
 
 def get_battery():
-    """Get MacBook battery level"""
+    """Get Mac battery level and charging status"""
     try:
-        result = subprocess.run(
-            ['pmset', '-g', 'batt'],
-            capture_output=True, text=True
-        )
+        result = subprocess.run(['pmset', '-g', 'batt'], capture_output=True, text=True)
         output = result.stdout
-        for line in output.split('\n'):
-            if '%' in line:
-                percent = line.split('\t')[1].split('%')[0].strip().split(';')[0]
-                charging = 'charging' in line.lower()
-                status = "and charging" if charging else "and not charging"
-                return f"Battery is at {percent} percent {status} sir."
-        return "I couldn't read the battery level sir."
+        
+        # Get percentage
+        import re
+        match = re.search(r'(\d+)%', output)
+        if not match:
+            return "Battery level unavailable sir."
+        pct = int(match.group(1))
+        
+        # Get charging status accurately
+        if 'AC Power' in output:
+            status = "charging"
+        elif 'discharging' in output.lower():
+            status = "not charging"
+        else:
+            status = "not charging"
+            
+        return f"Battery is at {pct} percent and {status} sir."
     except:
-        return "I couldn't read the battery level sir."
+        return "Battery information unavailable sir."
 
 def set_volume(level):
     """Set Mac system volume 0-100"""
@@ -285,3 +292,18 @@ def set_wallpaper(image_path):
         return "Wallpaper updated sir."
     except:
         return "I couldn't change the wallpaper sir."
+    
+def get_weather_data():
+    """Return raw weather data as dict for dashboard"""
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={WEATHER_KEY}&units=metric"
+        response = requests.get(url)
+        data = response.json()
+        return {
+            "temp": data["main"]["temp"],
+            "feels_like": data["main"]["feels_like"],
+            "description": data["weather"][0]["description"],
+            "humidity": data["main"]["humidity"]
+        }
+    except:
+        return {}

@@ -35,9 +35,6 @@ dashboard_thread.start()
 # Connect to Arduino
 arduino_connected = arduino_device.connect()
 
-# Start autonomous systems
-start_autonomous(speak, handle_action)
-
 # Handle physical button presses
 def on_button_press(btn):
     if btn == "BTN_MOVIE_MODE":
@@ -61,11 +58,14 @@ if arduino_connected:
 def handle_action(action, params):
     """Route actions to the right device module"""
     update_state("last_action", action)
-           # Log activity for schedule learning
+
+    # Log activity for schedule learning
     try:
         log_activity(action)
     except:
         pass
+
+    try:
         # Spotify actions
         if action == "spotify_play":
             spotify.play()
@@ -329,6 +329,9 @@ def handle_action(action, params):
     except Exception as e:
         print(f"Action error: {e}")
         speak_wait("My apologies sir, I encountered a slight technical difficulty.")
+
+# Start autonomous systems
+start_autonomous(speak, handle_action)
 
 def jarvis_main():
     """Main Jarvis loop"""
