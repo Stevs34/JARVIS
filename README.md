@@ -77,26 +77,27 @@ A fully functional AI home automation system inspired by Iron Man, built with Py
 ---
 
 ## 🏗️ Architecture
+```
 JARVIS/
-├── main.py              # Main control loop
-├── speech.py            # Voice I/O and wake word
-├── ai.py                # GPT-4o brain
-├── start_jarvis.sh      # Startup script
+├── main.py                 # Main control loop
+├── speech.py               # Voice I/O and wake word
+├── ai.py                   # GPT-4o brain
+├── start_jarvis.sh         # Startup script
 ├── core/
-│   ├── skills.py        # Weather, stocks, Wikipedia, etc.
-│   └── memory.py        # Persistent memory and reminders
+│   ├── skills.py           # Weather, stocks, Wikipedia, etc.
+│   └── memory.py           # Persistent memory and reminders
 ├── devices/
-│   ├── lights.py        # Tuya/Smart Life RGB lights
-│   ├── tv.py            # Vizio TV control
-│   ├── spotify.py       # Spotify multi-device control
-│   └── arduino.py       # Arduino serial communication
+│   ├── lights.py           # Tuya/Smart Life RGB lights
+│   ├── tv.py               # Vizio TV control
+│   ├── spotify.py          # Spotify multi-device control
+│   └── arduino.py          # Arduino serial communication
 ├── dashboard/
-│   └── app.py           # Flask web dashboard
+│   └── app.py              # Flask web dashboard
 ├── ui/
-│   └── orb.py           # Animated AI orb
+│   └── orb.py              # Animated AI orb
 └── arduino/
-└── jarvis.ino       # Arduino firmware
----
+    └── jarvis.ino          # Arduino firmware
+```
 
 ## 🚀 Setup
 
