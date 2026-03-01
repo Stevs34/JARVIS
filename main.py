@@ -1,6 +1,7 @@
 import subprocess
 import time
 from devices import lights
+from devices import tv as tv_device
 from datetime import datetime
 from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
                     set_timer, get_battery, set_volume, volume_up,
@@ -127,7 +128,29 @@ def handle_action(action, params):
             result = get_reminders()
             speak_wait(result)
 
-        # Arduino physical device actions
+        # TV actions
+        elif action == "tv_on":
+            tv_device.turn_on()
+            update_state("tv", "On")
+            speak_wait("TV on sir.")
+        elif action == "tv_off":
+            tv_device.turn_off()
+            update_state("tv", "Off")
+            speak_wait("TV off sir.")
+        elif action == "tv_volume_up":
+            tv_device.volume_up(params.get("amount", 5))
+            speak_wait("Volume up sir.")
+        elif action == "tv_volume_down":
+            tv_device.volume_down(params.get("amount", 5))
+            speak_wait("Volume down sir.")
+        elif action == "tv_mute":
+            tv_device.mute()
+            speak_wait("Muted sir.")
+        elif action == "tv_movie_mode":
+            tv_device.movie_mode()
+            update_state("tv", "On")
+
+        # Light actions
         elif action == "lights_on":
             lights.turn_on()
             update_state("lights", "On")
@@ -136,32 +159,40 @@ def handle_action(action, params):
             lights.turn_off()
             update_state("lights", "Off")
             speak_wait("Lights off sir.")
-        elif action == "movie_mode":
-            lights.movie_mode()
-            if arduino_connected:
-                arduino_device.movie_mode()
-            update_state("lights", "Movie Mode")
-        elif action == "study_mode":
-            lights.study_mode()
-            if arduino_connected:
-                arduino_device.study_mode()
-            update_state("lights", "Study Mode")
-        elif action == "lights_party_mode":
-            lights.party_mode()
-            if arduino_connected:
-                arduino_device.party_mode()
-            update_state("lights", "Party Mode")
-        elif action == "good_morning":
-            lights.good_morning()
-            if arduino_connected:
-                arduino_device.good_morning()
-            update_state("lights", "Morning Mode")
         elif action == "lights_brightness":
             lights.set_brightness(params.get("brightness", 50))
         elif action == "lights_colour":
             result = lights.set_colour_by_name(params.get("colour", "white"))
             speak_wait(result)
             update_state("lights", params.get("colour", "white"))
+
+        # Mode actions
+        elif action == "movie_mode":
+            lights.movie_mode()
+            tv_device.turn_on()
+            if arduino_connected:
+                arduino_device.movie_mode()
+            update_state("lights", "Movie Mode")
+            update_state("tv", "On")
+            speak_wait("Movie mode activated sir.")
+        elif action == "study_mode":
+            lights.study_mode()
+            if arduino_connected:
+                arduino_device.study_mode()
+            update_state("lights", "Study Mode")
+            speak_wait("Study mode activated sir.")
+        elif action == "lights_party_mode":
+            lights.party_mode()
+            if arduino_connected:
+                arduino_device.party_mode()
+            update_state("lights", "Party Mode")
+            speak_wait("Party mode activated sir.")
+        elif action == "good_morning":
+            lights.good_morning()
+            if arduino_connected:
+                arduino_device.good_morning()
+            update_state("lights", "Morning Mode")
+            speak_wait("Good morning sir.")
         elif action == "fan_on":
             if arduino_connected:
                 arduino_device.fan_on()
