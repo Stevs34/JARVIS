@@ -1,6 +1,8 @@
 import subprocess
 import time
-from skills import (get_weather, get_time, get_news, calculate, get_joke,
+from devices import lights
+from datetime import datetime
+from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
                     set_timer, get_battery, set_volume, volume_up,
                     volume_down, mute_mac, open_app, lock_mac, sleep_mac)
 from speech import speak, speak_wait, listen, wait_for_wake_word
@@ -8,7 +10,7 @@ from ai import ask_jarvis
 from devices import spotify
 from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
-from memory import remember, add_reminder, get_reminders, clear_reminder
+from core.memory import remember, add_reminder, get_reminders, clear_reminder
 import threading
 import json
 
@@ -127,30 +129,46 @@ def handle_action(action, params):
 
         # Arduino physical device actions
         elif action == "lights_on":
-            arduino_device.lights_on()
+            lights.turn_on()
             update_state("lights", "On")
             speak_wait("Lights on sir.")
         elif action == "lights_off":
-            arduino_device.lights_off()
+            lights.turn_off()
             update_state("lights", "Off")
             speak_wait("Lights off sir.")
         elif action == "movie_mode":
-            arduino_device.movie_mode()
+            lights.movie_mode()
+            if arduino_connected:
+                arduino_device.movie_mode()
             update_state("lights", "Movie Mode")
         elif action == "study_mode":
-            arduino_device.study_mode()
+            lights.study_mode()
+            if arduino_connected:
+                arduino_device.study_mode()
             update_state("lights", "Study Mode")
         elif action == "lights_party_mode":
-            arduino_device.party_mode()
+            lights.party_mode()
+            if arduino_connected:
+                arduino_device.party_mode()
             update_state("lights", "Party Mode")
         elif action == "good_morning":
-            arduino_device.good_morning()
+            lights.good_morning()
+            if arduino_connected:
+                arduino_device.good_morning()
             update_state("lights", "Morning Mode")
+        elif action == "lights_brightness":
+            lights.set_brightness(params.get("brightness", 50))
+        elif action == "lights_colour":
+            result = lights.set_colour_by_name(params.get("colour", "white"))
+            speak_wait(result)
+            update_state("lights", params.get("colour", "white"))
         elif action == "fan_on":
-            arduino_device.fan_on()
+            if arduino_connected:
+                arduino_device.fan_on()
             speak_wait("Fan on sir.")
         elif action == "fan_off":
-            arduino_device.fan_off()
+            if arduino_connected:
+                arduino_device.fan_off()
             speak_wait("Fan off sir.")
 
         elif action == "none":
@@ -218,9 +236,7 @@ while True:
             speak_wait("Goodbye sir.")
             exit()
 
-        # If Jarvis asked a question keep listening
         if "?" not in response:
             break
 
         time.sleep(0.5)
-        

@@ -1,0 +1,32 @@
+{
+    "timestamp": 1772337609.2882922,
+    "devices": [
+        {
+            "id": "ebd2fbfd17e7052046fumf",
+            "ip": "192.168.2.213",
+            "active": 2,
+            "encrypt": true,
+            "productKey": "te9ijkcagekthkyn",
+            "name": "Ceiling lights",
+            "key": "[(`mVly)g.V~]HHL",
+            "mac": "28:6d:cd:a2:6e:e7",
+            "ability": 0,
+            "token": "",
+            "wf_cfg": "",
+            "dev_type": "default",
+            "err": "",
+            "type": "default",
+            "dps": {
+                "dps": {
+                    "20": true,
+                    "21": "colour",
+                    "24": "000003e801f4",
+                    "25": "000e0d00002e03e802cc00000000",
+                    "26": 0
+                }
+            },
+            "origin": "broadcast",
+            "ver": "3.3"
+        }
+    ]
+}

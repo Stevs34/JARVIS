@@ -5,32 +5,69 @@ import pyaudio
 import struct
 import os
 import threading
+import tempfile
+from elevenlabs.client import ElevenLabs
 from dotenv import load_dotenv
 
 load_dotenv()
 
 PICOVOICE_KEY = os.getenv("PICOVOICE_ACCESS_KEY")
+ELEVENLABS_KEY = os.getenv("ELEVENLABS_API_KEY")
 
-# Initialize recognizer once globally — not every time we listen
+# Initialize ElevenLabs client
+el_client = ElevenLabs(api_key=ELEVENLABS_KEY)
+
+# Initialize recognizer once globally
 recognizer = sr.Recognizer()
 recognizer.pause_threshold = 1.5
 recognizer.phrase_threshold = 0.3
 recognizer.non_speaking_duration = 0.8
 recognizer.energy_threshold = 300
-recognizer.dynamic_energy_threshold = False  # Stops it recalibrating every time
+recognizer.dynamic_energy_threshold = False
+
+def play_audio(audio):
+    """Play audio bytes using Mac's built in afplay"""
+    audio_bytes = b"".join(chunk for chunk in audio)
+    with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as f:
+        f.write(audio_bytes)
+        temp_path = f.name
+    subprocess.run(['afplay', temp_path])
+    os.unlink(temp_path)
 
 def speak(text):
-    """Jarvis speaks back — non blocking so listening can resume faster"""
+    """Jarvis speaks using ElevenLabs — non blocking"""
     print(f"Jarvis: {text}")
-    subprocess.Popen(['say', '-v', 'Daniel', '-a', 'MacBook Air Speakers', text])
+    def _speak():
+        try:
+            audio = el_client.text_to_speech.convert(
+                text=text,
+                voice_id="onwK4e9ZLuTAKqWW03F9",
+                model_id="eleven_turbo_v2",
+                output_format="mp3_44100_128"
+            )
+            play_audio(audio)
+        except Exception as e:
+            print(f"ElevenLabs error: {e}")
+            subprocess.run(['say', '-v', 'Daniel', text])
+    threading.Thread(target=_speak, daemon=True).start()
 
 def speak_wait(text):
-    """Blocking speak — use when Jarvis needs to finish before continuing"""
+    """Blocking speak — waits until finished"""
     print(f"Jarvis: {text}")
-    subprocess.run(['say', '-v', 'Daniel', '-a', 'MacBook Air Speakers', text])
+    try:
+        audio = el_client.text_to_speech.convert(
+            text=text,
+            voice_id="onwK4e9ZLuTAKqWW03F9",
+            model_id="eleven_turbo_v2",
+            output_format="mp3_44100_128"
+        )
+        play_audio(audio)
+    except Exception as e:
+        print(f"ElevenLabs error: {e}")
+        subprocess.run(['say', '-v', 'Daniel', text])
 
 def wait_for_wake_word():
-    """Listen for 'Jarvis' wake word"""
+    """Listen for Jarvis wake word"""
     porcupine = pvporcupine.create(
         access_key=PICOVOICE_KEY,
         keywords=["jarvis"]
@@ -77,4 +114,4 @@ def listen():
         except sr.RequestError:
             speak("Sorry, I couldn't reach the speech service.")
             return None
-             
+        
