@@ -3,1037 +3,385 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>J.A.R.V.I.S. — WALL DISPLAY</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Exo+2:wght@200;300;400&display=swap" rel="stylesheet">
+<title>J.A.R.V.I.S.</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --primary: #00d4ff;
-    --primary-dim: rgba(0, 212, 255, 0.15);
-    --primary-glow: rgba(0, 212, 255, 0.4);
+    --c: #00d4ff;
+    --c2: rgba(0,212,255,0.15);
+    --c3: rgba(0,212,255,0.04);
+    --c4: rgba(0,212,255,0.4);
     --accent: #ff6b00;
-    --accent-dim: rgba(255, 107, 0, 0.15);
     --green: #00ff88;
-    --red: #ff3366;
-    --bg: #000810;
-    --panel: rgba(0, 20, 40, 0.85);
-    --border: rgba(0, 212, 255, 0.2);
-    --text: rgba(0, 212, 255, 0.9);
-    --text-dim: rgba(0, 212, 255, 0.4);
-    --font-display: 'Orbitron', monospace;
-    --font-mono: 'Share Tech Mono', monospace;
-    --font-body: 'Exo 2', sans-serif;
+    --red: #ff3355;
+    --yellow: #ffcc00;
+    --bg: #000912;
+    --panel: rgba(0,18,36,0.9);
+    --border: rgba(0,212,255,0.18);
+    --dim: rgba(0,212,255,0.45);
+    --f1: 'Orbitron', monospace;
+    --f2: 'Share Tech Mono', monospace;
+    --f3: 'Rajdhani', sans-serif;
   }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--c); font-family:var(--f3); height:100vh; overflow:hidden; position:relative; }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font-body);
-    min-height: 100vh;
-    overflow: hidden;
-    position: relative;
+  .bg-grid {
+    position:fixed; inset:0; z-index:0;
+    background-image: linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px);
+    background-size:50px 50px;
+    animation:grid-move 20s linear infinite;
   }
+  @keyframes grid-move { 0%{background-position:0 0} 100%{background-position:50px 50px} }
+  .bg-radial { position:fixed; inset:0; z-index:0; background:radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,50,90,0.35) 0%, transparent 70%); }
+  .scanline { position:fixed; left:0; right:0; height:3px; z-index:999; background:linear-gradient(to bottom, transparent, rgba(0,212,255,0.06), transparent); animation:scan 6s linear infinite; pointer-events:none; }
+  @keyframes scan { 0%{top:-3px} 100%{top:100vh} }
+  .bracket { position:fixed; width:24px; height:24px; z-index:10; }
+  .bracket.tl { top:10px; left:10px; border-top:2px solid var(--c); border-left:2px solid var(--c); }
+  .bracket.tr { top:10px; right:10px; border-top:2px solid var(--c); border-right:2px solid var(--c); }
+  .bracket.bl { bottom:10px; left:10px; border-bottom:2px solid var(--c); border-left:2px solid var(--c); }
+  .bracket.br { bottom:10px; right:10px; border-bottom:2px solid var(--c); border-right:2px solid var(--c); }
 
-  /* Background grid */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none;
-    z-index: 0;
-  }
+  .hud { position:relative; z-index:1; width:100vw; height:100vh; display:grid; grid-template-columns:260px 1fr 260px; grid-template-rows:56px 1fr 1fr 48px; gap:6px; padding:10px; }
 
-  /* Radial background glow */
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(0,60,100,0.3) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  .header { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:0 12px; border-bottom:1px solid var(--border); position:relative; }
+  .header::after { content:''; position:absolute; bottom:-1px; left:15%; right:15%; height:1px; background:linear-gradient(90deg, transparent, var(--c4), transparent); }
+  .logo { font-family:var(--f1); font-size:16px; font-weight:900; letter-spacing:10px; color:var(--c); text-shadow:0 0 20px var(--c4), 0 0 40px rgba(0,212,255,0.2); }
+  .header-mid { text-align:center; font-family:var(--f2); font-size:10px; color:var(--dim); letter-spacing:3px; }
+  .online-badge { display:flex; align-items:center; gap:8px; font-family:var(--f2); font-size:10px; color:var(--green); letter-spacing:2px; }
+  .online-dot { width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); animation:blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .hud {
-    position: relative;
-    z-index: 1;
-    width: 100vw;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 280px 1fr 280px;
-    grid-template-rows: 60px 1fr 1fr 60px;
-    gap: 8px;
-    padding: 8px;
-  }
+  .footer { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:0 12px; border-top:1px solid var(--border); font-family:var(--f2); font-size:9px; color:var(--dim); letter-spacing:2px; }
 
-  /* ── HEADER ── */
-  .header {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
+  .panel { background:var(--panel); border:1px solid var(--border); padding:10px 12px; position:relative; backdrop-filter:blur(12px); overflow:hidden; }
+  .panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--c4), transparent); }
+  .ptitle { font-family:var(--f1); font-size:8px; font-weight:700; letter-spacing:4px; color:var(--dim); text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .ptitle::before { content:''; width:10px; height:1px; background:var(--c); flex-shrink:0; }
+  .divider { height:1px; background:linear-gradient(90deg,var(--border),transparent); margin:8px 0; }
 
-  .header::after {
-    content: '';
-    position: absolute;
-    bottom: -1px;
-    left: 20%;
-    right: 20%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
-    filter: blur(1px);
-  }
+  .left { grid-column:1; grid-row:2/4; display:flex; flex-direction:column; gap:6px; }
+  .right { grid-column:3; grid-row:2/4; display:flex; flex-direction:column; gap:6px; }
+  .center-top { grid-column:2; grid-row:2; }
+  .center-bot { grid-column:2; grid-row:3; }
 
-  .logo {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 8px;
-    color: var(--primary);
-    text-shadow: 0 0 20px var(--primary-glow);
-  }
+  .clock-time { font-family:var(--f1); font-size:38px; font-weight:700; color:var(--c); letter-spacing:3px; line-height:1; text-shadow:0 0 20px var(--c4); }
+  .clock-date { font-family:var(--f2); font-size:10px; color:var(--dim); letter-spacing:3px; margin-top:3px; }
+  .weather-row { display:flex; align-items:center; gap:10px; margin-top:6px; }
+  .weather-temp { font-family:var(--f1); font-size:30px; font-weight:700; color:var(--c); text-shadow:0 0 15px var(--c4); }
+  .weather-info { display:flex; flex-direction:column; gap:2px; }
+  .weather-desc { font-family:var(--f2); font-size:11px; color:var(--c); }
+  .weather-feels { font-family:var(--f2); font-size:9px; color:var(--dim); }
 
-  .logo span {
-    color: var(--accent);
-    text-shadow: 0 0 20px rgba(255,107,0,0.6);
-  }
+  .dev-list { display:flex; flex-direction:column; gap:5px; }
+  .dev-item { display:flex; align-items:center; justify-content:space-between; padding:5px 7px; border:1px solid var(--border); background:var(--c3); }
+  .dev-name { font-family:var(--f2); font-size:9px; color:var(--dim); letter-spacing:2px; }
+  .dev-val { font-family:var(--f2); font-size:9px; letter-spacing:1px; padding:2px 5px; }
+  .dev-val.on { color:var(--green); background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.25); }
+  .dev-val.off { color:var(--dim); background:var(--c3); border:1px solid var(--border); }
+  .dev-val.active { color:var(--accent); background:rgba(255,107,0,0.08); border:1px solid rgba(255,107,0,0.25); }
 
-  .header-center {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
+  .stat-row { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin-top:6px; }
+  .stat { text-align:center; padding:5px; border:1px solid var(--border); background:var(--c3); }
+  .stat-val { font-family:var(--f1); font-size:16px; font-weight:700; color:var(--c); text-shadow:0 0 10px var(--c4); }
+  .stat-lbl { font-family:var(--f2); font-size:7px; color:var(--dim); letter-spacing:2px; margin-top:1px; }
+  .batt-bar { width:100%; height:3px; background:rgba(0,212,255,0.1); margin-top:6px; }
+  .batt-fill { height:100%; background:linear-gradient(90deg,var(--c),var(--green)); box-shadow:0 0 4px var(--c4); transition:width 1s; }
 
-  .status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--green);
-    letter-spacing: 2px;
-  }
-
-  .status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse-dot 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.8); }
-  }
-
-  /* ── PANELS ── */
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 12px;
-    position: relative;
-    backdrop-filter: blur(10px);
-    overflow: hidden;
-  }
-
-  .panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
-  }
-
-  .panel-title {
-    font-family: var(--font-display);
-    font-size: 9px;
-    font-weight: 700;
-    letter-spacing: 4px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .panel-title::before {
-    content: '';
-    width: 12px;
-    height: 1px;
-    background: var(--primary);
-  }
-
-  /* ── LEFT COLUMN ── */
-  .left-col {
-    grid-column: 1;
-    grid-row: 2 / 4;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* ── CENTER ── */
-  .center-top {
-    grid-column: 2;
-    grid-row: 2;
-  }
-
-  .center-bottom {
-    grid-column: 2;
-    grid-row: 3;
-  }
-
-  /* ── RIGHT COLUMN ── */
-  .right-col {
-    grid-column: 3;
-    grid-row: 2 / 4;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  /* ── FOOTER ── */
-  .footer {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    border-top: 1px solid var(--border);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-  }
-
-  /* ── ORB ── */
-  .orb-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 16px;
-  }
-
-  .orb-wrapper {
-    position: relative;
-    width: 200px;
-    height: 200px;
-  }
-
-  .orb-ring {
-    position: absolute;
-    border-radius: 50%;
-    border: 1px solid var(--primary);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    animation: ring-expand 3s ease-out infinite;
-  }
-
-  .orb-ring:nth-child(1) { animation-delay: 0s; }
-  .orb-ring:nth-child(2) { animation-delay: 1s; }
-  .orb-ring:nth-child(3) { animation-delay: 2s; }
-
-  @keyframes ring-expand {
-    0% { width: 100px; height: 100px; opacity: 0.6; }
-    100% { width: 220px; height: 220px; opacity: 0; }
-  }
-
+  .orb-area { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:12px; }
+  .orb-wrap { position:relative; width:180px; height:180px; }
+  .ring { position:absolute; border-radius:50%; border:1px solid var(--c); top:50%; left:50%; transform:translate(-50%,-50%); opacity:0; animation:ring-out 3s ease-out infinite; }
+  .ring:nth-child(1){animation-delay:0s} .ring:nth-child(2){animation-delay:1s} .ring:nth-child(3){animation-delay:2s}
+  @keyframes ring-out { 0%{width:90px;height:90px;opacity:0.5} 100%{width:200px;height:200px;opacity:0} }
   .orb-core {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%,
-      rgba(255,255,255,0.9) 0%,
-      var(--primary) 30%,
-      rgba(0, 100, 180, 0.8) 70%,
-      rgba(0, 30, 60, 0.9) 100%
-    );
-    box-shadow:
-      0 0 30px var(--primary-glow),
-      0 0 60px rgba(0,212,255,0.2),
-      0 0 100px rgba(0,212,255,0.1),
-      inset 0 0 30px rgba(0,150,255,0.3);
-    animation: orb-pulse 3s ease-in-out infinite;
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:90px; height:90px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, var(--c) 30%, rgba(0,90,160,0.85) 65%, rgba(0,20,50,0.95) 100%);
+    box-shadow:0 0 25px var(--c4), 0 0 50px rgba(0,212,255,0.2), 0 0 80px rgba(0,212,255,0.1);
+    animation:orb-pulse 3s ease-in-out infinite; transition:background 0.5s, box-shadow 0.5s;
   }
+  @keyframes orb-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.06)} }
+  .orb-label { font-family:var(--f1); font-size:9px; letter-spacing:5px; color:var(--c); text-shadow:0 0 10px var(--c4); text-transform:uppercase; }
+  .cmd-wrap { width:100%; padding:0 16px; }
+  .cmd-lbl { font-family:var(--f2); font-size:8px; color:var(--dim); letter-spacing:3px; margin-bottom:3px; }
+  .cmd-text { font-family:var(--f2); font-size:12px; color:var(--c); text-shadow:0 0 8px var(--c4); border-left:2px solid var(--c); padding-left:8px; min-height:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cmd-text::after { content:'▋'; animation:cur 1s step-end infinite; margin-left:3px; }
+  @keyframes cur { 0%,100%{opacity:1} 50%{opacity:0} }
 
-  @keyframes orb-pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); box-shadow: 0 0 30px var(--primary-glow), 0 0 60px rgba(0,212,255,0.2), 0 0 100px rgba(0,212,255,0.1); }
-    50% { transform: translate(-50%, -50%) scale(1.05); box-shadow: 0 0 50px var(--primary-glow), 0 0 80px rgba(0,212,255,0.3), 0 0 120px rgba(0,212,255,0.15); }
-  }
+  .track { font-family:var(--f2); font-size:12px; color:var(--c); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .artist { font-family:var(--f2); font-size:10px; color:var(--dim); margin-top:2px; }
+  .bars { display:flex; align-items:flex-end; gap:3px; height:18px; margin-top:5px; }
+  .bar { width:4px; background:var(--c); border-radius:1px; box-shadow:0 0 3px var(--c4); height:4px; }
+  .bar.playing { animation:bdance 0.7s ease-in-out infinite alternate; }
+  .bar:nth-child(1){animation-duration:0.5s} .bar:nth-child(2){animation-duration:0.8s;animation-delay:0.1s}
+  .bar:nth-child(3){animation-duration:0.6s;animation-delay:0.2s} .bar:nth-child(4){animation-duration:0.9s;animation-delay:0.05s}
+  .bar:nth-child(5){animation-duration:0.7s;animation-delay:0.15s} .bar:nth-child(6){animation-duration:0.5s;animation-delay:0.25s}
+  .bar:nth-child(7){animation-duration:0.8s;animation-delay:0.1s}
+  @keyframes bdance { from{height:3px} to{height:18px} }
 
-  .orb-state {
-    font-family: var(--font-display);
-    font-size: 10px;
-    letter-spacing: 4px;
-    color: var(--primary);
-    text-transform: uppercase;
-    text-shadow: 0 0 10px var(--primary-glow);
-  }
+  .hist-list { display:flex; flex-direction:column; gap:3px; overflow-y:auto; max-height:100px; }
+  .hist-item { display:flex; gap:8px; font-family:var(--f2); font-size:9px; padding:2px 0; border-bottom:1px solid rgba(0,212,255,0.04); }
+  .hist-t { color:var(--accent); flex-shrink:0; }
+  .hist-c { color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  /* ── CLOCK ── */
-  .clock-display {
-    text-align: center;
-    margin-bottom: 8px;
-  }
+  .dl-list { display:flex; flex-direction:column; gap:5px; overflow-y:auto; max-height:140px; }
+  .dl-item { padding:5px 7px; border-left:2px solid var(--c); background:var(--c3); }
+  .dl-item.urgent { border-left-color:var(--red); background:rgba(255,51,85,0.06); }
+  .dl-item.soon { border-left-color:var(--yellow); background:rgba(255,204,0,0.05); }
+  .dl-title { font-family:var(--f2); font-size:10px; color:var(--c); }
+  .dl-meta { font-family:var(--f2); font-size:8px; color:var(--dim); letter-spacing:1px; margin-top:1px; }
 
-  .clock-time {
-    font-family: var(--font-display);
-    font-size: 42px;
-    font-weight: 700;
-    color: var(--primary);
-    text-shadow: 0 0 20px var(--primary-glow);
-    letter-spacing: 4px;
-    line-height: 1;
-  }
-
-  .clock-date {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    margin-top: 4px;
-  }
-
-  /* ── WEATHER ── */
-  .weather-main {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-
-  .weather-temp {
-    font-family: var(--font-display);
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--primary);
-    text-shadow: 0 0 15px var(--primary-glow);
-  }
-
-  .weather-details {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .weather-desc {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text);
-    letter-spacing: 1px;
-  }
-
-  .weather-feels {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-
-  /* ── COMMAND ── */
-  .command-display {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .command-label {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    margin-bottom: 4px;
-  }
-
-  .command-text {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--primary);
-    text-shadow: 0 0 10px var(--primary-glow);
-    min-height: 20px;
-    border-left: 2px solid var(--primary);
-    padding-left: 8px;
-  }
-
-  .command-text::after {
-    content: '|';
-    animation: blink 1s step-end infinite;
-    margin-left: 2px;
-    color: var(--primary);
-  }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* ── SPOTIFY ── */
-  .spotify-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .spotify-track {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .spotify-artist {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-
-  .sound-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 20px;
-    margin-top: 6px;
-  }
-
-  .bar {
-    width: 4px;
-    background: var(--primary);
-    border-radius: 2px;
-    box-shadow: 0 0 4px var(--primary-glow);
-    animation: bar-dance 0.8s ease-in-out infinite alternate;
-  }
-
-  .bar:nth-child(1) { animation-duration: 0.6s; }
-  .bar:nth-child(2) { animation-duration: 0.8s; animation-delay: 0.1s; }
-  .bar:nth-child(3) { animation-duration: 0.5s; animation-delay: 0.2s; }
-  .bar:nth-child(4) { animation-duration: 0.9s; animation-delay: 0.15s; }
-  .bar:nth-child(5) { animation-duration: 0.7s; animation-delay: 0.05s; }
-  .bar:nth-child(6) { animation-duration: 0.6s; animation-delay: 0.25s; }
-  .bar:nth-child(7) { animation-duration: 0.8s; animation-delay: 0.1s; }
-
-  @keyframes bar-dance {
-    from { height: 4px; }
-    to { height: 20px; }
-  }
-
-  /* ── DEVICE STATUS ── */
-  .device-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .device-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 8px;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    background: rgba(0,212,255,0.03);
-  }
-
-  .device-name {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .device-status {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    letter-spacing: 1px;
-    padding: 2px 6px;
-    border-radius: 2px;
-  }
-
-  .device-status.on {
-    color: var(--green);
-    background: rgba(0,255,136,0.1);
-    border: 1px solid rgba(0,255,136,0.3);
-  }
-
-  .device-status.off {
-    color: var(--text-dim);
-    background: rgba(0,212,255,0.05);
-    border: 1px solid var(--border);
-  }
-
-  .device-status.active {
-    color: var(--accent);
-    background: rgba(255,107,0,0.1);
-    border: 1px solid rgba(255,107,0,0.3);
-  }
-
-  /* ── DEADLINES ── */
-  .deadline-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    overflow-y: auto;
-    max-height: 160px;
-  }
-
-  .deadline-item {
-    padding: 6px 8px;
-    border-left: 2px solid var(--primary);
-    background: var(--primary-dim);
-  }
-
-  .deadline-item.urgent {
-    border-left-color: var(--red);
-    background: rgba(255,51,102,0.08);
-  }
-
-  .deadline-item.soon {
-    border-left-color: var(--accent);
-    background: var(--accent-dim);
-  }
-
-  .deadline-title {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text);
-    margin-bottom: 2px;
-  }
-
-  .deadline-meta {
-    font-family: var(--font-mono);
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-  }
-
-  /* ── COMMAND HISTORY ── */
-  .history-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    overflow-y: auto;
-    max-height: 120px;
-  }
-
-  .history-item {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    padding: 3px 0;
-    border-bottom: 1px solid rgba(0,212,255,0.05);
-    display: flex;
-    gap: 8px;
-  }
-
-  .history-time {
-    color: var(--accent);
-    flex-shrink: 0;
-    font-size: 9px;
-  }
-
-  /* ── SYSTEM STATS ── */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  .stat-item {
-    text-align: center;
-    padding: 6px;
-    border: 1px solid var(--border);
-    background: rgba(0,212,255,0.03);
-  }
-
-  .stat-value {
-    font-family: var(--font-display);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary);
-    text-shadow: 0 0 10px var(--primary-glow);
-  }
-
-  .stat-label {
-    font-family: var(--font-mono);
-    font-size: 8px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 2px;
-  }
-
-  /* ── BATTERY BAR ── */
-  .battery-bar {
-    width: 100%;
-    height: 4px;
-    background: rgba(0,212,255,0.1);
-    border-radius: 2px;
-    margin-top: 8px;
-    overflow: hidden;
-  }
-
-  .battery-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary), var(--green));
-    box-shadow: 0 0 6px var(--primary-glow);
-    border-radius: 2px;
-    transition: width 1s ease;
-  }
-
-  /* ── SCAN LINE EFFECT ── */
-  .scanline {
-    position: fixed;
-    top: -100%;
-    left: 0;
-    right: 0;
-    height: 100%;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0,212,255,0.015) 50%,
-      transparent 100%
-    );
-    animation: scan 8s linear infinite;
-    pointer-events: none;
-    z-index: 100;
-  }
-
-  @keyframes scan {
-    0% { top: -100%; }
-    100% { top: 100%; }
-  }
-
-  /* ── CORNER DECORATIONS ── */
-  .corner {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    z-index: 2;
-  }
-
-  .corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--primary); border-left: 2px solid var(--primary); }
-  .corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--primary); border-right: 2px solid var(--primary); }
-  .corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--primary); border-left: 2px solid var(--primary); }
-  .corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--primary); border-right: 2px solid var(--primary); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 2px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--primary-dim); }
-
-  .no-data {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    font-style: italic;
-  }
-
-  .divider {
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-    margin: 8px 0;
-  }
+  .sysrow { display:flex; justify-content:space-between; align-items:center; padding:3px 0; border-bottom:1px solid rgba(0,212,255,0.05); }
+  .syslbl { font-family:var(--f2); font-size:8px; color:var(--dim); letter-spacing:2px; }
+  .sysval { font-family:var(--f2); font-size:9px; }
+  .sysval.ok { color:var(--green); }
+  .sysval.dim { color:var(--dim); }
+  .nodata { font-family:var(--f2); font-size:9px; color:var(--dim); font-style:italic; }
+  ::-webkit-scrollbar { width:2px; }
+  ::-webkit-scrollbar-thumb { background:var(--c2); }
 </style>
 </head>
 <body>
-
+<div class="bg-grid"></div>
+<div class="bg-radial"></div>
 <div class="scanline"></div>
-<div class="corner tl"></div>
-<div class="corner tr"></div>
-<div class="corner bl"></div>
-<div class="corner br"></div>
+<div class="bracket tl"></div><div class="bracket tr"></div>
+<div class="bracket bl"></div><div class="bracket br"></div>
 
 <div class="hud">
 
-  <!-- HEADER -->
   <div class="header">
-    <div class="logo">J.A.R.V.I.<span>S</span></div>
-    <div class="header-center">JUST A RATHER VERY INTELLIGENT SYSTEM — v4.2.1</div>
-    <div class="status-indicator">
-      <div class="status-dot"></div>
-      <span>ALL SYSTEMS ONLINE</span>
+    <div class="logo">J.A.R.V.I.S.</div>
+    <div class="header-mid">JUST A RATHER VERY INTELLIGENT SYSTEM &nbsp;·&nbsp; STARK INDUSTRIES</div>
+    <div class="online-badge"><div class="online-dot"></div>ALL SYSTEMS ONLINE</div>
+  </div>
+
+  <div class="left">
+    <div class="panel" style="flex:0 0 auto">
+      <div class="ptitle">TEMPORAL / ENV</div>
+      <div class="clock-time" id="clock">00:00:00</div>
+      <div class="clock-date" id="cdate">---</div>
+      <div class="divider"></div>
+      <div class="weather-row">
+        <div class="weather-temp" id="wtemp">--°</div>
+        <div class="weather-info">
+          <div class="weather-desc" id="wdesc">SCANNING...</div>
+          <div class="weather-feels" id="wfeels">FEELS LIKE --°</div>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="flex:1">
+      <div class="ptitle">DEVICE STATUS</div>
+      <div class="dev-list">
+        <div class="dev-item"><span class="dev-name">LIGHTS</span><span class="dev-val on" id="d-lights">ON</span></div>
+        <div class="dev-item"><span class="dev-name">VIZIO TV</span><span class="dev-val off" id="d-tv">OFF</span></div>
+        <div class="dev-item"><span class="dev-name">SPOTIFY</span><span class="dev-val active" id="d-spotify">ACTIVE</span></div>
+        <div class="dev-item"><span class="dev-name">ARDUINO</span><span class="dev-val off" id="d-arduino">OFFLINE</span></div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><div class="stat-val" id="s-batt">--%</div><div class="stat-lbl">BATTERY</div></div>
+        <div class="stat"><div class="stat-val" id="s-uptime">0m</div><div class="stat-lbl">UPTIME</div></div>
+      </div>
+      <div class="batt-bar"><div class="batt-fill" id="batt-fill" style="width:0%"></div></div>
     </div>
   </div>
 
-  <!-- LEFT COLUMN -->
-  <div class="left-col">
-
-    <!-- Clock + Weather -->
-    <div class="panel" style="flex: 0 0 auto;">
-      <div class="panel-title">TEMPORAL / ENVIRONMENTAL</div>
-      <div class="clock-display">
-        <div class="clock-time" id="clock">00:00:00</div>
-        <div class="clock-date" id="date">LOADING...</div>
-      </div>
-      <div class="divider"></div>
-      <div class="weather-main">
-        <div class="weather-temp" id="weather-temp">--°</div>
-        <div class="weather-details">
-          <div class="weather-desc" id="weather-desc">SCANNING...</div>
-          <div class="weather-feels" id="weather-feels">FEELS LIKE --°</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Device Status -->
-    <div class="panel" style="flex: 1;">
-      <div class="panel-title">DEVICE STATUS</div>
-      <div class="device-list">
-        <div class="device-item">
-          <span class="device-name">LIGHTS</span>
-          <span class="device-status on" id="lights-status">ON</span>
-        </div>
-        <div class="device-item">
-          <span class="device-name">TV</span>
-          <span class="device-status off" id="tv-status">OFF</span>
-        </div>
-        <div class="device-item">
-          <span class="device-name">SPOTIFY</span>
-          <span class="device-status active" id="spotify-status">ACTIVE</span>
-        </div>
-        <div class="device-item">
-          <span class="device-name">ARDUINO</span>
-          <span class="device-status off" id="arduino-status">OFFLINE</span>
-        </div>
-      </div>
-      <div class="divider"></div>
-      <div class="stat-grid">
-        <div class="stat-item">
-          <div class="stat-value" id="battery-val">--%</div>
-          <div class="stat-label">BATTERY</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value" id="uptime-val">0h</div>
-          <div class="stat-label">UPTIME</div>
-        </div>
-      </div>
-      <div class="battery-bar">
-        <div class="battery-fill" id="battery-bar" style="width: 0%"></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- CENTER TOP — ORB + COMMAND -->
   <div class="panel center-top">
-    <div class="orb-container">
-      <div class="orb-wrapper">
-        <div class="orb-ring"></div>
-        <div class="orb-ring"></div>
-        <div class="orb-ring"></div>
-        <div class="orb-core" id="orb-core"></div>
+    <div class="orb-area">
+      <div class="orb-wrap">
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
+        <div class="orb-core" id="orb"></div>
       </div>
-      <div class="orb-state" id="orb-state">STANDBY</div>
-      <div style="width: 100%; padding: 0 20px;">
-        <div class="command-label">LAST COMMAND RECEIVED</div>
-        <div class="command-text" id="last-command">Awaiting input...</div>
+      <div class="orb-label" id="orb-lbl">STANDBY</div>
+      <div class="cmd-wrap">
+        <div class="cmd-lbl">LAST COMMAND RECEIVED</div>
+        <div class="cmd-text" id="last-cmd">Awaiting input...</div>
       </div>
     </div>
   </div>
 
-  <!-- CENTER BOTTOM — SPOTIFY + HISTORY -->
-  <div class="panel center-bottom">
-    <div style="display: flex; flex-direction: column; height: 100%; gap: 12px;">
-
-      <!-- Spotify -->
+  <div class="panel center-bot">
+    <div style="display:flex;flex-direction:column;height:100%;gap:10px">
       <div>
-        <div class="panel-title">AUDIO SYSTEMS</div>
-        <div class="spotify-info">
-          <div class="spotify-track" id="spotify-track">No track playing</div>
-          <div class="spotify-artist" id="spotify-artist">—</div>
-        </div>
-        <div class="sound-bars" id="sound-bars">
-          <div class="bar" style="height:8px"></div>
-          <div class="bar" style="height:14px"></div>
-          <div class="bar" style="height:6px"></div>
-          <div class="bar" style="height:18px"></div>
-          <div class="bar" style="height:10px"></div>
-          <div class="bar" style="height:16px"></div>
-          <div class="bar" style="height:8px"></div>
+        <div class="ptitle">AUDIO SYSTEMS</div>
+        <div class="track" id="sp-track">No track playing</div>
+        <div class="artist" id="sp-artist">—</div>
+        <div class="bars">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
       </div>
-
       <div class="divider"></div>
-
-      <!-- Command History -->
-      <div style="flex: 1; overflow: hidden;">
-        <div class="panel-title">COMMAND HISTORY</div>
-        <div class="history-list" id="history-list">
-          <div class="no-data">No commands logged yet</div>
-        </div>
+      <div style="flex:1;overflow:hidden">
+        <div class="ptitle">COMMAND LOG</div>
+        <div class="hist-list" id="hist"><div class="nodata">No commands logged</div></div>
       </div>
-
     </div>
   </div>
 
-  <!-- RIGHT COLUMN -->
-  <div class="right-col">
-
-    <!-- Deadlines -->
-    <div class="panel" style="flex: 1;">
-      <div class="panel-title">ACADEMIC DEADLINES</div>
-      <div class="deadline-list" id="deadline-list">
-        <div class="no-data">No deadlines loaded</div>
-      </div>
+  <div class="right">
+    <div class="panel" style="flex:1">
+      <div class="ptitle">ACADEMIC DEADLINES</div>
+      <div class="dl-list" id="dl-list"><div class="nodata">No deadlines on record</div></div>
     </div>
-
-    <!-- Last Action + AI Status -->
-    <div class="panel" style="flex: 0 0 auto;">
-      <div class="panel-title">SYSTEM ACTIVITY</div>
-      <div style="display: flex; flex-direction: column; gap: 6px;">
-        <div>
-          <div class="command-label">LAST ACTION</div>
-          <div class="command-text" id="last-action" style="font-size: 11px;">none</div>
-        </div>
-        <div class="divider"></div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="command-label">AI MODEL</span>
-          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--green);">GPT-4o-mini</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="command-label">VOICE</span>
-          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--green);">ElevenLabs</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="command-label">WAKE WORD</span>
-          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--green);">Picovoice</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span class="command-label">LOCATION</span>
-          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">Fredericton, NB</span>
-        </div>
-      </div>
+    <div class="panel" style="flex:0 0 auto">
+      <div class="ptitle">SYSTEM PROFILE</div>
+      <div class="sysrow"><span class="syslbl">AI MODEL</span><span class="sysval ok">GPT-4o-mini</span></div>
+      <div class="sysrow"><span class="syslbl">VOICE</span><span class="sysval ok">ElevenLabs</span></div>
+      <div class="sysrow"><span class="syslbl">WAKE WORD</span><span class="sysval ok">Picovoice</span></div>
+      <div class="sysrow"><span class="syslbl">LAST ACTION</span><span class="sysval dim" id="last-action">—</span></div>
+      <div class="sysrow"><span class="syslbl">LOCATION</span><span class="sysval dim">Fredericton, NB</span></div>
+      <div class="sysrow"><span class="syslbl">USER</span><span class="sysval dim">Cole Steeves</span></div>
     </div>
-
   </div>
 
-  <!-- FOOTER -->
   <div class="footer">
-    <span>STARK INDUSTRIES — RESTRICTED ACCESS</span>
-    <span id="footer-time">SYSTEM TIME: 00:00:00 UTC</span>
-    <span>USER: COLE STEEVES // CLEARANCE: LEVEL 5</span>
+    <span>STARK INDUSTRIES — RESTRICTED ACCESS — CLEARANCE LVL 5</span>
+    <span id="utc">UTC 00:00:00</span>
+    <span>J.A.R.V.I.S. v4.2.1 — COLE STEEVES</span>
   </div>
 
 </div>
 
 <script>
-  const JARVIS_API = 'http://192.168.2.42:8080';
+  const API = 'http://192.168.2.50:8080';
   let startTime = Date.now();
-  let commandHistory = [];
+  let cmdHistory = [];
 
-  // ── CLOCK ──
-  function updateClock() {
-    const now = new Date();
-    const time = now.toTimeString().split(' ')[0];
+  function pad(x){ return String(x).padStart(2,'0'); }
+
+  function tick() {
+    const n = new Date();
+    document.getElementById('clock').textContent = `${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
     const days = ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY'];
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-    const date = `${days[now.getDay()]} // ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-
-    document.getElementById('clock').textContent = time;
-    document.getElementById('date').textContent = date;
-    document.getElementById('footer-time').textContent = `SYSTEM TIME: ${now.toUTCString().split(' ')[4]} UTC`;
+    document.getElementById('cdate').textContent = `${days[n.getDay()]} // ${n.getDate()} ${months[n.getMonth()]} ${n.getFullYear()}`;
+    document.getElementById('utc').textContent = `UTC ${pad(n.getUTCHours())}:${pad(n.getUTCMinutes())}:${pad(n.getUTCSeconds())}`;
   }
+  setInterval(tick, 1000); tick();
 
-  // ── UPTIME ──
-  function updateUptime() {
-    const elapsed = Math.floor((Date.now() - startTime) / 1000);
-    const h = Math.floor(elapsed / 3600);
-    const m = Math.floor((elapsed % 3600) / 60);
-    document.getElementById('uptime-val').textContent = h > 0 ? `${h}h ${m}m` : `${m}m`;
+  function uptimeTick() {
+    const s = Math.floor((Date.now()-startTime)/1000);
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+    document.getElementById('s-uptime').textContent = h > 0 ? `${h}h${m}m` : `${m}m`;
   }
+  setInterval(uptimeTick, 10000); uptimeTick();
 
-  // ── FETCH JARVIS STATE ──
-  async function fetchState() {
-    try {
-      const res = await fetch(`${JARVIS_API}/state`);
-      const data = await res.json();
-
-      // Last command
-      if (data.last_command) {
-        document.getElementById('last-command').textContent = data.last_command;
-
-        // Add to history
-        const now = new Date();
-        const timeStr = now.toTimeString().split(' ')[0];
-        if (commandHistory.length === 0 || commandHistory[0].cmd !== data.last_command) {
-          commandHistory.unshift({ time: timeStr, cmd: data.last_command });
-          if (commandHistory.length > 8) commandHistory.pop();
-          renderHistory();
-        }
-      }
-
-      // Last action
-      if (data.last_action) {
-        document.getElementById('last-action').textContent = data.last_action.replace(/_/g, ' ').toUpperCase();
-      }
-
-      // Spotify
-      if (data.spotify) {
-        const parts = data.spotify.split(' — ');
-        document.getElementById('spotify-track').textContent = parts[0] || data.spotify;
-        document.getElementById('spotify-artist').textContent = parts[1] || '—';
-      }
-
-      // Device statuses
-      updateDeviceStatus('lights-status', data.lights);
-      updateDeviceStatus('tv-status', data.tv);
-
-      // Orb state
-      updateOrbState(data.jarvis_state || 'idle');
-
-    } catch(e) {
-      // Dashboard not reachable
-    }
-  }
-
-  function updateDeviceStatus(id, value) {
-    if (!value) return;
+  function setDevStatus(id, val) {
+    if (!val) return;
     const el = document.getElementById(id);
-    const v = value.toLowerCase();
-    el.textContent = value.toUpperCase();
-    el.className = 'device-status';
+    const v = val.toLowerCase();
+    el.textContent = val.toUpperCase();
+    el.className = 'dev-val';
     if (v === 'on' || v === 'online') el.classList.add('on');
     else if (v === 'off' || v === 'offline') el.classList.add('off');
     else el.classList.add('active');
   }
 
-  // ── ORB STATE ──
-  function updateOrbState(state) {
-    const orb = document.getElementById('orb-core');
-    const label = document.getElementById('orb-state');
-    const colours = {
-      idle: { bg: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, #00d4ff 30%, rgba(0,100,180,0.8) 70%, rgba(0,30,60,0.9) 100%)', shadow: '0 0 30px rgba(0,212,255,0.4), 0 0 60px rgba(0,212,255,0.2)', label: 'STANDBY' },
-      listening: { bg: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, #00ffb4 30%, rgba(0,180,100,0.8) 70%, rgba(0,40,20,0.9) 100%)', shadow: '0 0 30px rgba(0,255,180,0.5), 0 0 60px rgba(0,255,180,0.25)', label: 'LISTENING' },
-      processing: { bg: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, #ffa500 30%, rgba(200,100,0,0.8) 70%, rgba(40,20,0,0.9) 100%)', shadow: '0 0 30px rgba(255,165,0,0.5), 0 0 60px rgba(255,165,0,0.25)', label: 'PROCESSING' },
-      speaking: { bg: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, #00ff64 30%, rgba(0,180,60,0.8) 70%, rgba(0,40,10,0.9) 100%)', shadow: '0 0 30px rgba(0,255,100,0.5), 0 0 60px rgba(0,255,100,0.25)', label: 'SPEAKING' },
+  function setOrb(state) {
+    const orb = document.getElementById('orb');
+    const lbl = document.getElementById('orb-lbl');
+    const map = {
+      idle:       { bg:'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, #00d4ff 30%, rgba(0,90,160,0.85) 65%, rgba(0,20,50,0.95) 100%)', sh:'0 0 25px rgba(0,212,255,0.4), 0 0 50px rgba(0,212,255,0.2)', lbl:'STANDBY' },
+      listening:  { bg:'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, #00ffb4 30%, rgba(0,180,100,0.85) 65%, rgba(0,40,20,0.95) 100%)', sh:'0 0 25px rgba(0,255,180,0.5), 0 0 50px rgba(0,255,180,0.25)', lbl:'LISTENING' },
+      processing: { bg:'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, #ffa500 30%, rgba(200,100,0,0.85) 65%, rgba(40,20,0,0.95) 100%)', sh:'0 0 25px rgba(255,165,0,0.5), 0 0 50px rgba(255,165,0,0.25)', lbl:'PROCESSING' },
+      speaking:   { bg:'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.95) 0%, #00ff64 30%, rgba(0,180,60,0.85) 65%, rgba(0,40,10,0.95) 100%)', sh:'0 0 25px rgba(0,255,100,0.5), 0 0 50px rgba(0,255,100,0.25)', lbl:'SPEAKING' }
     };
-    const c = colours[state] || colours.idle;
+    const c = map[state] || map.idle;
     orb.style.background = c.bg;
-    orb.style.boxShadow = c.shadow;
-    label.textContent = c.label;
+    orb.style.boxShadow = c.sh;
+    lbl.textContent = c.lbl;
   }
 
-  // ── HISTORY ──
+  function setBattery(pct) {
+    document.getElementById('s-batt').textContent = pct + '%';
+    const fill = document.getElementById('batt-fill');
+    fill.style.width = pct + '%';
+    if (pct < 20) fill.style.background = 'linear-gradient(90deg,#ff3355,#ff6666)';
+    else if (pct < 50) fill.style.background = 'linear-gradient(90deg,#ffcc00,#ffaa00)';
+    else fill.style.background = 'linear-gradient(90deg,var(--c),var(--green))';
+  }
+
   function renderHistory() {
-    const list = document.getElementById('history-list');
-    if (commandHistory.length === 0) {
-      list.innerHTML = '<div class="no-data">No commands logged yet</div>';
-      return;
-    }
-    list.innerHTML = commandHistory.map(h => `
-      <div class="history-item">
-        <span class="history-time">${h.time}</span>
-        <span>${h.cmd}</span>
-      </div>
-    `).join('');
+    const el = document.getElementById('hist');
+    if (!cmdHistory.length) { el.innerHTML = '<div class="nodata">No commands logged</div>'; return; }
+    el.innerHTML = cmdHistory.map(h => `<div class="hist-item"><span class="hist-t">${h.t}</span><span class="hist-c">${h.c}</span></div>`).join('');
   }
 
-  // ── DEADLINES ──
-  async function fetchDeadlines() {
-    try {
-      const res = await fetch('jarvis_deadlines.json');
-      const deadlines = await res.json();
-      renderDeadlines(deadlines);
-    } catch(e) {
-      // Try to load from same origin
-    }
-  }
-
-  function renderDeadlines(deadlines) {
-    const list = document.getElementById('deadline-list');
-    if (!deadlines || deadlines.length === 0) {
-      list.innerHTML = '<div class="no-data">No deadlines on record</div>';
-      return;
-    }
-
+  function renderDeadlines(data) {
+    const el = document.getElementById('dl-list');
+    if (!data || !data.length) { el.innerHTML = '<div class="nodata">No deadlines on record</div>'; return; }
     const now = new Date();
-    const sorted = deadlines
-      .map(d => {
-        const due = new Date(d.due_date);
-        const days = Math.floor((due - now) / 86400000);
-        return { ...d, days };
-      })
-      .filter(d => d.days >= 0)
-      .sort((a, b) => a.days - b.days);
-
-    list.innerHTML = sorted.slice(0, 5).map(d => {
-      let cls = '';
-      let daysText = d.days === 0 ? 'TODAY' : d.days === 1 ? 'TOMORROW' : `${d.days}D`;
-      if (d.days <= 1) cls = 'urgent';
-      else if (d.days <= 3) cls = 'soon';
-
-      return `
-        <div class="deadline-item ${cls}">
-          <div class="deadline-title">${d.title.toUpperCase()}</div>
-          <div class="deadline-meta">${d.course} // ${d.type.toUpperCase()} // ${daysText}</div>
-        </div>
-      `;
+    const sorted = data.map(d => ({ ...d, days: Math.floor((new Date(d.due_date) - now) / 86400000) }))
+      .filter(d => d.days >= 0).sort((a,b) => a.days - b.days);
+    if (!sorted.length) { el.innerHTML = '<div class="nodata">No upcoming deadlines</div>'; return; }
+    el.innerHTML = sorted.slice(0,5).map(d => {
+      const cls = d.days <= 1 ? 'urgent' : d.days <= 3 ? 'soon' : '';
+      const dt = d.days === 0 ? 'TODAY' : d.days === 1 ? 'TOMORROW' : `${d.days}D`;
+      return `<div class="dl-item ${cls}"><div class="dl-title">${d.title.toUpperCase()}</div><div class="dl-meta">${d.course} // ${(d.type||'').toUpperCase()} // ${dt}</div></div>`;
     }).join('');
   }
 
-  // ── WEATHER ──
+  async function fetchState() {
+    try {
+      const res = await fetch(`${API}/state`);
+      const d = await res.json();
+      if (d.last_command && d.last_command !== 'None') {
+        document.getElementById('last-cmd').textContent = d.last_command;
+        const t = new Date();
+        const ts = `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+        if (!cmdHistory.length || cmdHistory[0].c !== d.last_command) {
+          cmdHistory.unshift({ t: ts, c: d.last_command });
+          if (cmdHistory.length > 8) cmdHistory.pop();
+          renderHistory();
+        }
+      }
+      if (d.last_action && d.last_action !== 'None') {
+        document.getElementById('last-action').textContent = d.last_action.replace(/_/g,' ').toUpperCase();
+      }
+      if (d.spotify) {
+        const parts = d.spotify.split(' — ');
+        document.getElementById('sp-track').textContent = parts[0] || d.spotify;
+        document.getElementById('sp-artist').textContent = parts[1] || '—';
+        const playing = d.spotify !== 'Nothing playing' && d.spotify !== 'Paused';
+        document.querySelectorAll('.bar').forEach(b => playing ? b.classList.add('playing') : b.classList.remove('playing'));
+        document.getElementById('d-spotify').textContent = playing ? 'PLAYING' : 'PAUSED';
+        document.getElementById('d-spotify').className = 'dev-val ' + (playing ? 'active' : 'off');
+      }
+      setDevStatus('d-lights', d.lights);
+      setDevStatus('d-tv', d.tv);
+      setOrb(d.jarvis_state || 'idle');
+      if (d.battery) setBattery(parseInt(d.battery));
+    } catch(e) {}
+  }
+
   async function fetchWeather() {
     try {
-      const res = await fetch(`${JARVIS_API}/weather`);
-      const data = await res.json();
-      if (data.temp !== undefined) {
-        document.getElementById('weather-temp').textContent = `${Math.round(data.temp)}°`;
-        document.getElementById('weather-desc').textContent = (data.description || '').toUpperCase();
-        document.getElementById('weather-feels').textContent = `FEELS LIKE ${Math.round(data.feels_like)}°`;
+      const res = await fetch(`${API}/weather`);
+      const d = await res.json();
+      if (d.temp !== undefined) {
+        document.getElementById('wtemp').textContent = Math.round(d.temp) + '°';
+        document.getElementById('wdesc').textContent = (d.description || '').toUpperCase();
+        document.getElementById('wfeels').textContent = `FEELS LIKE ${Math.round(d.feels_like)}°`;
       }
-    } catch(e) {
-      // Weather unavailable
-    }
+    } catch(e) {}
   }
 
-  // ── BATTERY (from Jarvis state) ──
-  function updateBattery(pct) {
-    document.getElementById('battery-val').textContent = `${pct}%`;
-    document.getElementById('battery-bar').style.width = `${pct}%`;
-    const fill = document.getElementById('battery-bar');
-    if (pct < 20) fill.style.background = 'linear-gradient(90deg, #ff3366, #ff6666)';
-    else if (pct < 50) fill.style.background = 'linear-gradient(90deg, #ffa500, #ffcc00)';
-    else fill.style.background = 'linear-gradient(90deg, var(--primary), var(--green))';
+  async function fetchDeadlines() {
+    try {
+      const res = await fetch(`${API}/deadlines`);
+      const d = await res.json();
+      renderDeadlines(d);
+    } catch(e) {}
   }
 
-  // ── INIT ──
-  setInterval(updateClock, 1000);
-  setInterval(updateUptime, 10000);
+  setBattery(54);
   setInterval(fetchState, 2000);
-  setInterval(fetchDeadlines, 30000);
   setInterval(fetchWeather, 300000);
-
-  updateClock();
+  setInterval(fetchDeadlines, 30000);
   fetchState();
-  fetchDeadlines();
   fetchWeather();
-
-  // Demo battery
-  updateBattery(54);
+  fetchDeadlines();
 </script>
-
 </body>
 </html>
-```

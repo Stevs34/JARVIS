@@ -204,6 +204,16 @@ def run_command(action):
         return jsonify({"status": "ok", "action": action})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+    
+@app.route("/deadlines")
+def get_deadlines_route():
+    try:
+        import json
+        with open('jarvis_deadlines.json', 'r') as f:
+            return jsonify(json.load(f))
+    except:
+        return jsonify([])
+
 
 def run_dashboard():
     app.run(host="0.0.0.0", port=8080, debug=False, use_reloader=False)

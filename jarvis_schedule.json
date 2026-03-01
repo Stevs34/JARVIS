@@ -54,7 +54,134 @@
       "action": "lights_colour",
       "hour": 12,
       "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 13,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 13,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 13,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_on",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "tv_on",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "tv_off",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "study_mode",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_on",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "none",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "get_time",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "tv_on",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "set_volume",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "tv_off",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "open_app",
+      "hour": 14,
+      "day": "Sunday"
+    },
+    {
+      "action": "lights_colour",
+      "hour": 15,
+      "day": "Sunday"
+    },
+    {
+      "action": "send_imessage",
+      "hour": 15,
+      "day": "Sunday"
+    },
+    {
+      "action": "open_app",
+      "hour": 16,
+      "day": "Sunday"
+    },
+    {
+      "action": "get_joke",
+      "hour": 16,
+      "day": "Sunday"
+    },
+    {
+      "action": "get_stock",
+      "hour": 16,
+      "day": "Sunday"
+    },
+    {
+      "action": "none",
+      "hour": 16,
+      "day": "Sunday"
     }
   ],
-  "suggestions_made": []
+  "suggestions_made": [
+    "Sunday_14_lights_colour"
+  ]
 }
