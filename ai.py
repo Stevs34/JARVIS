@@ -52,6 +52,11 @@ def ask_jarvis(command):
                 - "movie_mode" : {}
                 - "study_mode" : {}
                 - "good_morning" : {}
+                - "get_weather" : {}
+                - "get_time" : {}
+                - "get_news" : {}
+                - "calculate" : {"expression": "math expression"}
+                - "get_joke" : {}
                 - "none" : {}
                 
                 If no device action is needed, use "none".

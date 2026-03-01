@@ -1,4 +1,5 @@
 import subprocess
+from skills import get_weather, get_time, get_news, calculate, get_joke
 from speech import speak, listen, wait_for_wake_word
 from speech import speak, listen
 from ai import ask_jarvis
@@ -39,6 +40,24 @@ def handle_action(action, params):
             update_state("spotify", track)
         elif action == "spotify_play_on_device":
             spotify.play_on_device(params.get("device", ""))
+
+        # Skills
+        elif action == "get_weather":
+            result = get_weather()
+            speak(result)
+            update_state("last_action", result)
+        elif action == "get_time":
+            result = get_time()
+            speak(result)
+        elif action == "get_news":
+            result = get_news()
+            speak(result)
+        elif action == "calculate":
+            result = calculate(params.get("expression", ""))
+            speak(result)
+        elif action == "get_joke":
+            result = get_joke()
+            speak(result)
 
         # Placeholder actions for devices we'll connect at home
         elif action in ["lights_on", "lights_off", "lights_movie_mode",
