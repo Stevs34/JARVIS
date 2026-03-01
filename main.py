@@ -19,9 +19,7 @@ from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
 from core.memory import remember, add_reminder, get_reminders, clear_reminder
 
-# Orb temporarily disabled
-def set_orb_state(state):
-    pass
+from ui.orb import set_orb_state
 
 # Start dashboard in background thread
 dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
@@ -349,6 +347,6 @@ def jarvis_main():
 jarvis_thread = threading.Thread(target=jarvis_main, daemon=True)
 jarvis_thread.start()
 
-# Keep main thread alive
-while True:
-    time.sleep(1)
+# Launch orb on main thread — required by macOS
+from ui.orb import launch_orb, set_orb_state as _set_orb
+launch_orb()
