@@ -1,7 +1,6 @@
 import subprocess
 from skills import get_weather, get_time, get_news, calculate, get_joke
-from speech import speak, listen, wait_for_wake_word
-from speech import speak, listen
+from speech import speak, speak_wait, listen, wait_for_wake_word
 from ai import ask_jarvis
 from devices import spotify
 from dashboard.app import run_dashboard, update_state
@@ -76,16 +75,13 @@ def handle_action(action, params):
         speak("I encountered an issue with that command sir.")
 
 # Boot up
-speak("Good evening. J.A.R.V.I.S. online. All systems ready.")
+speak_wait("Good evening. JARVIS online. All systems ready.")
 
 while True:
-    # Wait for wake word first
     wait_for_wake_word()
-    
-    # Wake word detected — play a subtle chime and listen
     subprocess.run(['afplay', '/System/Library/Sounds/Tink.aiff'])
-    speak("Yes?")
-    
+    speak_wait("Yes?")
+
     command = listen()
     if command:
         print(f"Processing: {command}")
@@ -97,9 +93,10 @@ while True:
         params = result.get("params", {})
 
         print(f"Action: {action}")
-        speak(response)
+        speak(response)  # Non-blocking so actions start immediately
         handle_action(action, params)
 
         if command == "stop" or action == "shutdown":
-            speak("Goodbye sir.")
+            speak_wait("Goodbye sir.")
             break
+        
