@@ -1,20 +1,41 @@
+# Fast imports at top
 import subprocess
 import time
-from devices import lights
-from devices import tv as tv_device
 from datetime import datetime
-from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
-                    set_timer, get_battery, set_volume, volume_up,
-                    volume_down, mute_mac, open_app, lock_mac, sleep_mac)
 from speech import speak, speak_wait, listen, wait_for_wake_word
 from ai import ask_jarvis
 from devices import spotify
-from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
 from core.memory import remember, add_reminder, get_reminders, clear_reminder
 import threading
 import json
 
+# Lazy load device modules
+try:
+    from devices import lights
+    lights_available = True
+except:
+    lights_available = False
+
+try:
+    from devices import tv as tv_device
+    tv_available = True
+except:
+    tv_available = False
+
+try:
+    from devices import arduino as arduino_device
+    arduino_available = True
+except:
+    arduino_available = False
+
+# Skills - lazy loaded inside functions so startup is fast
+from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
+                    set_timer, get_battery, set_volume, volume_up,
+                    volume_down, mute_mac, open_app, lock_mac, sleep_mac,
+                    get_sports_scores, get_stock, wikipedia_search,
+                    translate_text, random_fact, media_play_pause,
+                    media_next, media_previous, send_imessage, get_directions)
 # Start dashboard in background thread
 dashboard_thread = threading.Thread(target=run_dashboard, daemon=True)
 dashboard_thread.start()
@@ -115,6 +136,39 @@ def handle_action(action, params):
             speak_wait(result)
         elif action == "sleep_mac":
             result = sleep_mac()
+            speak_wait(result)
+        elif action == "get_sports":
+            result = get_sports_scores(params.get("sport", "nhl"))
+            speak_wait(result)
+        elif action == "get_stock":
+            result = get_stock(params.get("symbol", "AAPL"))
+            speak_wait(result)
+        elif action == "wikipedia":
+            result = wikipedia_search(params.get("query", ""))
+            speak_wait(result)
+        elif action == "translate":
+            result = translate_text(params.get("text", ""), params.get("language", "fr"))
+            speak_wait(result)
+        elif action == "random_fact":
+            result = random_fact()
+            speak_wait(result)
+        elif action == "media_play_pause":
+            result = media_play_pause()
+            speak_wait(result)
+        elif action == "media_next":
+            result = media_next()
+            speak_wait(result)
+        elif action == "media_previous":
+            result = media_previous()
+            speak_wait(result)
+        elif action == "send_imessage":
+            result = send_imessage(
+                params.get("contact", ""),
+                params.get("message", "")
+            )
+            speak_wait(result)
+        elif action == "get_directions":
+            result = get_directions(params.get("destination", ""))
             speak_wait(result)
 
         # Memory actions

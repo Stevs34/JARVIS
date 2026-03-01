@@ -60,6 +60,16 @@ def ask_jarvis(command):
     - "sleep_mac" : {}
     - "add_reminder" : {"text": "reminder text", "time": "optional time"}
     - "get_reminders" : {}
+    - "get_sports" : {"sport": "nhl/nba/nfl"}
+    - "get_stock" : {"symbol": "ticker symbol e.g. AAPL"}
+    - "wikipedia" : {"query": "search term"}
+    - "translate" : {"text": "text to translate", "language": "target language"}
+    - "random_fact" : {}
+    - "media_play_pause" : {}
+    - "media_next" : {}
+    - "media_previous" : {}
+    - "send_imessage" : {"contact": "name or number", "message": "message text"}
+    - "get_directions" : {"destination": "address or place"}
     - "none" : {}
     """
 
@@ -78,7 +88,8 @@ def ask_jarvis(command):
         "Possible actions and their params:\n"
         + actions +
         "\nAlways respond ONLY with the JSON object, nothing else.\n"
-        "Keep the response field to 1 short sentence for speed."
+        "Keep the response field to 1 short sentence for speed.\n"
+        "For actions that fetch data like get_stock, get_weather, get_time, wikipedia, get_sports, random_fact — set response to an empty string '' since the skill will speak the result directly."
     )
 
     conversation_history.append({

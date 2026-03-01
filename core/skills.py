@@ -155,3 +155,133 @@ def sleep_mac():
         return "Going to sleep sir."
     except:
         return "I couldn't sleep the Mac sir."
+
+import yfinance as yf
+import wikipediaapi
+import subprocess
+import json
+
+def get_sports_scores(team=None):
+    """Get latest sports scores"""
+    try:
+        url = "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard"
+        response = requests.get(url)
+        data = response.json()
+        events = data.get("events", [])
+        if not events:
+            return "No games found today sir."
+        result = "Here are today's scores. "
+        for event in events[:3]:
+            name = event.get("name", "")
+            status = event["status"]["type"]["description"]
+            comps = event.get("competitions", [{}])[0]
+            competitors = comps.get("competitors", [])
+            if len(competitors) == 2:
+                team1 = competitors[0]["team"]["shortDisplayName"]
+                score1 = competitors[0]["score"]
+                team2 = competitors[1]["team"]["shortDisplayName"]
+                score2 = competitors[1]["score"]
+                result += f"{team1} {score1}, {team2} {score2} — {status}. "
+        return result
+    except Exception as e:
+        return "I couldn't retrieve the scores sir."
+
+def get_stock(symbol):
+    """Get current stock price"""
+    try:
+        import yfinance as yf
+        ticker = yf.Ticker(symbol.upper())
+        info = ticker.fast_info
+        price = round(info.last_price, 2)
+        prev = round(info.previous_close, 2)
+        change = round(price - prev, 2)
+        direction = "up" if change > 0 else "down"
+        return f"{symbol.upper()} is trading at {price} dollars, {direction} {abs(change)} from yesterday sir."
+    except:
+        return f"I couldn't retrieve the stock price for {symbol} sir."
+
+def wikipedia_search(query):
+    """Search Wikipedia for a topic"""
+    try:
+        import wikipediaapi
+        wiki = wikipediaapi.Wikipedia(
+            language='en',
+            extract_format=wikipediaapi.ExtractFormat.WIKI,
+            user_agent='JARVIS/1.0'
+        )
+        page = wiki.page(query)
+        if page.exists():
+            summary = page.summary[:500]
+            sentences = summary.split('. ')
+            return '. '.join(sentences[:2]) + '.'
+        return f"I couldn't find anything on {query} sir."
+    except:
+        return f"I couldn't search Wikipedia right now sir."
+
+def translate_text(text, target_language):
+    """Translate text to another language"""
+    try:
+        from translate import Translator
+        translator = Translator(to_lang=target_language)
+        result = translator.translate(text)
+        return f"The translation is: {result}"
+    except:
+        return "I couldn't translate that sir."
+
+
+def random_fact():
+    """Get a random interesting fact"""
+    try:
+        response = requests.get("https://uselessfacts.jsph.pl/random.json?language=en")
+        data = response.json()
+        return data.get("text", "I couldn't find a fact right now sir.")
+    except:
+        return "I couldn't retrieve a fact right now sir."
+
+def media_play_pause():
+    """Play or pause media on Mac"""
+    subprocess.run(['osascript', '-e', 'tell application "System Events" to key code 49'])
+    return "Done sir."
+
+def media_next():
+    """Skip to next track on Mac"""
+    subprocess.run(['osascript', '-e', 'tell application "System Events" to key code 124 using command down'])
+    return "Next track sir."
+
+def media_previous():
+    """Go to previous track on Mac"""
+    subprocess.run(['osascript', '-e', 'tell application "System Events" to key code 123 using command down'])
+    return "Previous track sir."
+
+def send_imessage(contact, message):
+    """Send an iMessage"""
+    try:
+        script = f'''
+        tell application "Messages"
+            set targetBuddy to "{contact}"
+            set targetService to 1st account whose service type = iMessage
+            send "{message}" to participant targetBuddy of targetService
+        end tell
+        '''
+        subprocess.run(['osascript', '-e', script])
+        return f"Message sent to {contact} sir."
+    except:
+        return f"I couldn't send the message sir."
+
+def get_directions(destination):
+    """Open directions in Apple Maps"""
+    try:
+        destination_encoded = destination.replace(' ', '+')
+        subprocess.run(['open', f'maps://?daddr={destination_encoded}'])
+        return f"Opening directions to {destination} sir."
+    except:
+        return "I couldn't open directions sir."
+
+def set_wallpaper(image_path):
+    """Set Mac wallpaper"""
+    try:
+        script = f'tell application "Finder" to set desktop picture to POSIX file "{image_path}"'
+        subprocess.run(['osascript', '-e', script])
+        return "Wallpaper updated sir."
+    except:
+        return "I couldn't change the wallpaper sir."
