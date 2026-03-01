@@ -1,6 +1,8 @@
 import requests
 import os
 import datetime
+import subprocess
+import threading
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -60,3 +62,96 @@ def get_joke():
         return f"{data['setup']} ... {data['punchline']}"
     except:
         return "I couldn't think of a joke right now sir."
+
+def set_timer(seconds, speak_func):
+    """Set a timer for a given number of seconds"""
+    def timer_thread():
+        threading.Event().wait(seconds)
+        speak_func(f"Sir, your {seconds} second timer is up.")
+        subprocess.run(['afplay', '/System/Library/Sounds/Glass.aiff'])
+    t = threading.Thread(target=timer_thread, daemon=True)
+    t.start()
+    minutes = seconds // 60
+    secs = seconds % 60
+    if minutes > 0:
+        return f"Timer set for {minutes} minutes and {secs} seconds sir."
+    return f"Timer set for {seconds} seconds sir."
+
+def get_battery():
+    """Get MacBook battery level"""
+    try:
+        result = subprocess.run(
+            ['pmset', '-g', 'batt'],
+            capture_output=True, text=True
+        )
+        output = result.stdout
+        for line in output.split('\n'):
+            if '%' in line:
+                percent = line.split('\t')[1].split('%')[0].strip().split(';')[0]
+                charging = 'charging' in line.lower()
+                status = "and charging" if charging else "and not charging"
+                return f"Battery is at {percent} percent {status} sir."
+        return "I couldn't read the battery level sir."
+    except:
+        return "I couldn't read the battery level sir."
+
+def set_volume(level):
+    """Set Mac system volume 0-100"""
+    try:
+        subprocess.run(['osascript', '-e', f'set volume output volume {level}'])
+        return f"Volume set to {level} percent sir."
+    except:
+        return "I couldn't set the volume sir."
+
+def volume_up():
+    """Increase Mac volume by 10"""
+    try:
+        script = 'set volume output volume (output volume of (get volume settings) + 10)'
+        subprocess.run(['osascript', '-e', script])
+        return "Volume increased sir."
+    except:
+        return "I couldn't increase the volume sir."
+
+def volume_down():
+    """Decrease Mac volume by 10"""
+    try:
+        script = 'set volume output volume (output volume of (get volume settings) - 10)'
+        subprocess.run(['osascript', '-e', script])
+        return "Volume decreased sir."
+    except:
+        return "I couldn't decrease the volume sir."
+
+def mute_mac():
+    """Mute Mac system volume"""
+    try:
+        subprocess.run(['osascript', '-e', 'set volume output muted true'])
+        return "Muted sir."
+    except:
+        return "I couldn't mute the volume sir."
+
+def open_app(app_name):
+    """Open a Mac application by name"""
+    try:
+        subprocess.Popen(['open', '-a', app_name])
+        return f"Opening {app_name} sir."
+    except:
+        return f"I couldn't find {app_name} sir."
+
+def lock_mac():
+    """Lock the Mac screen"""
+    try:
+        subprocess.run([
+            'osascript', '-e',
+            'tell application "System Events" to keystroke "q" using {command down, control down}'
+        ])
+        return "Locking your screen sir."
+    except:
+        return "I couldn't lock the screen sir."
+
+def sleep_mac():
+    """Put Mac to sleep"""
+    try:
+        subprocess.run(['pmset', 'sleepnow'])
+        return "Going to sleep sir."
+    except:
+        return "I couldn't sleep the Mac sir."

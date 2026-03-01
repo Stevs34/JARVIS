@@ -57,6 +57,15 @@ def ask_jarvis(command):
                 - "get_news" : {}
                 - "calculate" : {"expression": "math expression"}
                 - "get_joke" : {}
+                - "set_timer" : {"seconds": number}
+                - "get_battery" : {}
+                - "set_volume" : {"level": 0-100}
+                - "volume_up" : {}
+                - "volume_down" : {}
+                - "mute_mac" : {}
+                - "open_app" : {"app": "app name"}
+                - "lock_mac" : {}
+                - "sleep_mac" : {}
                 - "none" : {}
                 
                 If no device action is needed, use "none".
