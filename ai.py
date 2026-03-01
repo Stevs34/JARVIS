@@ -80,6 +80,8 @@ def ask_jarvis(command):
     - "add_lab_result" : {"result": "result value or description"}
     - "set_lab_section" : {"section": "objective/equipment/procedure/conclusion", "content": "text"}
     - "export_lab_report" : {}
+    - "get_lab_notes" : {}
+    - "delete_reminder" : {"keyword": "word from reminder text"}
     - "none" : {}
     """
 

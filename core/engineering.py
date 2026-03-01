@@ -429,5 +429,29 @@ def export_lab_report():
         f.write("CONCLUSION\n" + "-" * 20 + "\n")
         f.write(notes["sections"]["conclusion"] + "\n")
 
+def get_lab_notes():
+    """Read back current lab report notes"""
+    notes = load_lab_notes()
+    if not notes.get("current_lab"):
+        return "No active lab report sir."
+    
+    result = f"Current lab report for {notes['current_lab']}. "
+    
+    observations = notes["sections"].get("observations", [])
+    if observations:
+        result += f"You have {len(observations)} observations. "
+        for obs in observations:
+            result += f"At {obs['time']}: {obs['note']}. "
+    else:
+        result += "No observations recorded yet sir. "
+
+    results = notes["sections"].get("results", [])
+    if results:
+        result += f"Results: "
+        for r in results:
+            result += f"{r}. "
+
+    return result
+
     subprocess.run(['open', filepath])
     return f"Lab report exported to your Desktop as {filename} sir."

@@ -104,3 +104,32 @@ def clear_reminder(index):
         save_memory(memory)
         return f"Removed reminder: {removed['text']}"
     return "I couldn't find that reminder sir."
+
+def delete_reminder(index=None, keyword=None):
+    """Delete a reminder by index or keyword"""
+    memory = load_memory()
+    reminders = memory.get("reminders", [])
+    
+    if not reminders:
+        return "You have no reminders to delete sir."
+    
+    if keyword:
+        # Find reminder by keyword
+        for i, r in enumerate(reminders):
+            if keyword.lower() in r["text"].lower():
+                removed = reminders.pop(i)
+                memory["reminders"] = reminders
+                save_memory(memory)
+                return f"Removed reminder: {removed['text']} sir."
+        return f"I couldn't find a reminder matching '{keyword}' sir."
+    
+    elif index is not None:
+        if 0 < index <= len(reminders):
+            removed = reminders.pop(index - 1)
+            memory["reminders"] = reminders
+            save_memory(memory)
+            return f"Removed reminder: {removed['text']} sir."
+        return "Invalid reminder number sir."
+    
+    return "Please specify which reminder to remove sir."
+

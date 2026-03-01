@@ -15,13 +15,16 @@ from core.skills import (get_weather, get_time, get_news, calculate, get_joke,
 from core.engineering import (solve_engineering, summarize_pdf, get_latest_pdf,
                                add_deadline, get_deadlines, check_urgent_deadlines,
                                start_lab_report, add_lab_observation, add_lab_result,
-                               set_lab_section, export_lab_report, unit_convert)
+                               set_lab_section, export_lab_report, unit_convert,
+                               get_lab_notes)
 from speech import speak, speak_wait, listen, wait_for_wake_word
 from ai import ask_jarvis
+from core.autonomous import start_autonomous, log_activity
 from devices import spotify
 from devices import arduino as arduino_device
 from dashboard.app import run_dashboard, update_state
-from core.memory import remember, add_reminder, get_reminders, clear_reminder
+from core.memory import remember, add_reminder, get_reminders, clear_reminder, delete_reminder
+
 
 from ui.orb import set_orb_state
 
@@ -31,6 +34,9 @@ dashboard_thread.start()
 
 # Connect to Arduino
 arduino_connected = arduino_device.connect()
+
+# Start autonomous systems
+start_autonomous(speak, handle_action)
 
 # Handle physical button presses
 def on_button_press(btn):
@@ -55,7 +61,11 @@ if arduino_connected:
 def handle_action(action, params):
     """Route actions to the right device module"""
     update_state("last_action", action)
+           # Log activity for schedule learning
     try:
+        log_activity(action)
+    except:
+        pass
         # Spotify actions
         if action == "spotify_play":
             spotify.play()
@@ -172,6 +182,12 @@ def handle_action(action, params):
             speak_wait(result)
         elif action == "get_reminders":
             result = get_reminders()
+            speak_wait(result)
+        elif action == "delete_reminder":
+            result = delete_reminder(
+                index=params.get("index", None),
+                keyword=params.get("keyword", "")
+            )
             speak_wait(result)
 
         # TV actions
@@ -302,6 +318,10 @@ def handle_action(action, params):
         elif action == "export_lab_report":
             result = export_lab_report()
             speak_wait(result)
+                
+        elif action == "get_lab_notes":
+            result = get_lab_notes()
+            speak_wait(result)
 
         elif action == "none":
             pass
@@ -332,10 +352,10 @@ def jarvis_main():
     except:
         pass
 
-    # Check reminders
+# Check reminders
     try:
         reminders = get_reminders()
-        if "No reminders" not in reminders:
+        if "no reminders" not in reminders.lower():
             speak_wait(f"Sir, you have pending items. {reminders}")
     except:
         pass
